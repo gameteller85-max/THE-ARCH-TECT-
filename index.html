@@ -3,106 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Architect - Mastery Edition v4.5</title>
+    <title>The Architect - Final Mastery v4.6</title>
     <style>
-        * { box-sizing: border-box; }
-        body {
-            background-color: #0d0d0d;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            transition: background 0.8s ease;
-        }
-
-        .vs-box {
-            background: rgba(26, 26, 26, 0.95);
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            width: 90%;
-            max-width: 450px;
-            border: 1px solid #444;
-            z-index: 10;
-            box-shadow: 0 0 40px rgba(0,0,0,0.8);
-        }
-
-        h2 { color: #fff; margin-bottom: 25px; font-size: 24px; }
-        
-        .selection-area { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-        
-        select { 
-            padding: 12px; 
-            background: #333; 
-            color: white; 
-            border-radius: 10px; 
-            width: 42%; 
-            border: 1px solid #555; 
-            outline: none;
-            font-size: 14px;
-        }
-
-        button { 
-            background: linear-gradient(45deg, #ff4444, #cc0000); 
-            color: white; 
-            padding: 15px; 
-            border: none; 
-            border-radius: 50px; 
-            font-weight: bold; 
-            width: 100%; 
-            cursor: pointer; 
-            transition: 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        button:active { transform: scale(0.95); }
-        
-        #result { 
-            margin-top: 25px; 
-            color: #ddd; 
-            font-size: 22px; 
-            font-weight: bold; 
-            min-height: 30px; 
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-
-        .win-text { color: #ffcc00 !important; text-shadow: 0 0 20px #ffcc00 !important; }
-
-        .signature { 
-            position: fixed; 
-            bottom: 20px; 
-            color: #444; 
-            font-size: 11px; 
-            letter-spacing: 2px; 
-            font-weight: bold; 
-        }
-
-        #quote-display {
-            margin-top: 15px;
-            font-style: italic;
-            color: #aaa;
-            font-size: 14px;
-            min-height: 20px;
-        }
+        body { background: #0d0d0d; color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; transition: background 0.8s; overflow: hidden; }
+        .vs-box { background: rgba(30, 30, 30, 0.95); padding: 30px; border-radius: 20px; text-align: center; border: 2px solid #444; width: 90%; max-width: 420px; box-shadow: 0 0 50px rgba(0,0,0,0.9); z-index: 10; }
+        select, button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: none; font-weight: bold; font-size: 16px; }
+        select { background: #333; color: white; outline: none; border: 1px solid #555; -webkit-appearance: none; }
+        button { background: linear-gradient(45deg, #ff4444, #cc0000); color: white; cursor: pointer; transition: 0.3s; text-transform: uppercase; box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3); }
+        button:active { transform: scale(0.96); filter: brightness(1.2); }
+        #result { font-size: 24px; margin-top: 20px; font-weight: bold; min-height: 35px; transition: 0.3s; }
+        .quote { font-style: italic; color: #bbb; margin-top: 10px; font-size: 15px; min-height: 20px; }
+        .signature { position: fixed; bottom: 15px; color: #555; font-size: 11px; letter-spacing: 2px; font-weight: bold; }
+        .architect-text { color: #888; transition: 0.5s; }
+        .signature:hover .architect-text { color: #ff4444; text-shadow: 0 0 10px #ff4444; }
     </style>
 </head>
 <body>
 
 <div class="vs-box">
-    <h2>⚔️ Efsanevi Karşılaşma</h2>
-    <div class="selection-area">
+    <h2 style="margin: 0 0 20px 0;">⚔️ Efsanevi Karşılaşma</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
         <select id="char1">
             <option value="0">Naruto</option>
             <option value="1">Itachi</option>
             <option value="2">Sasuke</option>
             <option value="3" selected>Pain</option>
         </select>
-        <span style="color: white; font-weight: bold;">VS</span>
+        <span style="font-weight: bold; color: #ff4444;">VS</span>
         <select id="char2">
             <option value="0" selected>Naruto</option>
             <option value="1">Itachi</option>
@@ -110,24 +37,20 @@
             <option value="3">Pain</option>
         </select>
     </div>
-    
-    <button id="fightBtn" onclick="fight()">SAVAŞI BAŞLAT</button>
-    
-    <p id="result">Karakterini seç ve başla!</p>
-    <p id="quote-display"></p>
+    <button onclick="fight()">SAVAŞI BAŞLAT</button>
+    <div id="result">Karakterini seç ve başla!</div>
+    <div id="quote" class="quote"></div>
 </div>
 
-<div class="signature">
-    DEVELOPED BY <span style="color: #666;">THE ARCHITECT MUSTAFA</span>
-</div>
+<div class="signature">DEVELOPED BY <span class="architect-text">THE ARCHITECT MUSTAFA</span></div>
 
-<audio id="s-0" src="https://www.myinstants.com/media/sounds/naruto-uzumaki-dattebayo.mp3" preload="auto"></audio>
-<audio id="s-1" src="https://www.myinstants.com/media/sounds/itachi-susanoo.mp3" preload="auto"></audio>
-<audio id="s-2" src="https://www.myinstants.com/media/sounds/chidori-sound-effect.mp3" preload="auto"></audio>
-<audio id="s-3" src="https://www.myinstants.com/media/sounds/shinra-tensei.mp3" preload="auto"></audio>
+<audio id="s-0" src="https://files.catbox.moe/6f3z6o.mp3" preload="auto"></audio>
+<audio id="s-1" src="https://files.catbox.moe/7m7t7j.mp3" preload="auto"></audio>
+<audio id="s-2" src="https://files.catbox.moe/1p6u8h.mp3" preload="auto"></audio>
+<audio id="s-3" src="https://files.catbox.moe/55k455.mp3" preload="auto"></audio>
 
 <script>
-    const characters = [
+    const chars = [
         { name: "Naruto", color: "#4d2600", quote: "Vazgeçmeyeceğim, bu benim yolum!" },
         { name: "Itachi", color: "#260000", quote: "Affet Sasuke, bir dahaki sefere..." },
         { name: "Sasuke", color: "#000026", quote: "Gözlerim karanlığı net görüyor." },
@@ -135,50 +58,47 @@
     ];
 
     function fight() {
-        const val1 = parseInt(document.getElementById("char1").value);
-        const val2 = parseInt(document.getElementById("char2").value);
-        const resultEl = document.getElementById("result");
-        const quoteEl = document.getElementById("quote-display");
+        const c1 = parseInt(document.getElementById("char1").value);
+        const c2 = parseInt(document.getElementById("char2").value);
+        const res = document.getElementById("result");
+        const quoteEl = document.getElementById("quote");
 
-        if (val1 === val2) { 
-            resultEl.innerText = "❌ Aynı karakter olmaz!"; 
+        if(c1 === c2) { 
+            res.innerText = "❌ Aynı karakter olmaz!"; 
+            res.style.color = "#ff4444";
             quoteEl.innerText = "";
             return; 
         }
 
-        // Temizlik
-        resultEl.classList.remove("win-text");
-        document.body.style.background = "#0d0d0d";
-        resultEl.innerText = "⚡ Çakralar çarpışıyor...";
+        // Başlangıç Temizliği
+        res.style.color = "white";
+        res.innerText = "⚡ Çakralar çarpışıyor...";
         quoteEl.innerText = "";
+        document.body.style.background = "#0d0d0d";
 
-        // Tüm sesleri durdur
+        // Mevcut sesleri sustur
         for(let i=0; i<4; i++) {
             let s = document.getElementById("s-" + i);
-            s.pause();
-            s.currentTime = 0;
+            if(s) { s.pause(); s.currentTime = 0; }
         }
 
         setTimeout(() => {
-            // Şans faktörü ile kazananı belirle
-            const winnerIdx = Math.random() > 0.5 ? val1 : val2;
-            const winner = characters[winnerIdx];
-
-            resultEl.innerText = "🔥 Kazanan: " + winner.name;
-            resultEl.classList.add("win-text");
+            const winnerIdx = Math.random() > 0.5 ? c1 : c2;
+            const winner = chars[winnerIdx];
+            
+            res.innerText = "🔥 Kazanan: " + winner.name;
+            res.style.color = "#ffcc00";
             quoteEl.innerText = `"${winner.quote}"`;
             document.body.style.background = winner.color;
 
-            // Sesi çal
             const sound = document.getElementById("s-" + winnerIdx);
             if(sound) {
-                sound.play().catch(error => {
-                    console.log("Ses çalmak için ekrana bir kez dokunmalısın.");
+                sound.play().catch(e => {
+                    console.log("Ses engellendi: Sayfaya dokunmayı unutma!");
                 });
             }
         }, 850);
     }
 </script>
-
 </body>
 </html>

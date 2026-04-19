@@ -8,7 +8,7 @@
         body { 
             background: #050505; 
             color: white; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: sans-serif; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
@@ -16,81 +16,62 @@
             height: 100vh; 
             margin: 0;
             overflow: hidden;
+            transition: background 0.5s;
         }
 
-        /* Arkaplan Rinnegan Tasarımı */
+        /* Gelişmiş Rinnegan Efekti */
         .rinnegan-container {
             position: absolute;
             z-index: -1;
-            display: flex;
+            display: none; /* Başlangıçta gizli */
             align-items: center;
             justify-content: center;
+            opacity: 0.4;
         }
         .ring {
             position: absolute;
-            border: 2px solid rgba(138, 112, 161, 0.15);
+            border: 3px solid #8a70a1;
             border-radius: 50%;
+            box-shadow: 0 0 15px #8a70a1, inset 0 0 15px #8a70a1;
         }
-        .r1 { width: 150px; height: 150px; }
-        .r2 { width: 300px; height: 300px; }
-        .r3 { width: 450px; height: 450px; }
+        .r1 { width: 120px; height: 120px; }
+        .r2 { width: 260px; height: 260px; }
+        .r3 { width: 420px; height: 420px; }
         .r4 { width: 600px; height: 600px; }
 
         .vs-box { 
-            background: rgba(20, 20, 20, 0.9); 
+            background: rgba(15, 15, 15, 0.95); 
             padding: 30px; 
             border-radius: 20px; 
             text-align: center; 
             border: 1px solid #333; 
             width: 85%; 
             max-width: 380px; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
             backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
         }
 
-        h2 { margin-bottom: 20px; font-size: 24px; letter-spacing: 1px; }
-        
         select { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 10px 0; 
-            border-radius: 8px; 
-            background: #222; 
-            color: white; 
-            border: 1px solid #444;
-            font-size: 16px;
+            width: 100%; padding: 12px; margin: 10px 0; 
+            border-radius: 8px; background: #222; color: white; 
+            border: 1px solid #444; font-weight: bold;
         }
 
         button { 
-            width: 100%; 
-            padding: 15px; 
-            margin-top: 15px; 
-            border-radius: 8px; 
-            background: #e63946; 
-            color: white; 
-            border: none; 
-            font-weight: bold; 
-            font-size: 18px;
-            cursor: pointer;
-            transition: 0.3s;
+            width: 100%; padding: 15px; margin-top: 15px; 
+            border-radius: 8px; background: #ff4444; color: white; 
+            border: none; font-weight: bold; cursor: pointer;
+            font-size: 16px; transition: 0.2s;
         }
-        button:hover { background: #ff4d5a; transform: translateY(-2px); }
-        button:active { transform: scale(0.98); }
+        button:active { transform: scale(0.95); }
 
-        #result { 
-            font-size: 20px; 
-            margin-top: 20px; 
-            min-height: 30px;
-            font-weight: bold;
-            color: #ffcc00;
-        }
-
-        .signature { position: fixed; bottom: 15px; color: #333; font-size: 11px; letter-spacing: 2px; }
+        #result { margin-top: 20px; font-size: 20px; font-weight: bold; color: #ffcc00; }
+        .signature { position: fixed; bottom: 15px; color: #444; font-size: 10px; letter-spacing: 2px; }
     </style>
 </head>
 <body>
 
-<div class="rinnegan-container">
+<div id="rinnegan" class="rinnegan-container">
     <div class="ring r1"></div>
     <div class="ring r2"></div>
     <div class="ring r3"></div>
@@ -98,27 +79,27 @@
 </div>
 
 <div class="vs-box">
-    <h2>⚔️ Efsanevi Karşılaşma</h2>
+    <h2 id="title">⚔️ Efsanevi Karşılaşma</h2>
     
-    <select id="char1">
+    <select id="char1" onchange="checkVisuals()">
         <option value="0">Naruto</option>
         <option value="1">Itachi</option>
         <option value="2">Sasuke</option>
         <option value="3" selected>Pain</option>
     </select>
 
-    <div style="font-weight: bold; color: #555; margin: 5px;">VS</div>
+    <div style="color: #666; margin: 5px;">VS</div>
 
-    <select id="char2">
+    <select id="char2" onchange="checkVisuals()">
         <option value="0" selected>Naruto</option>
         <option value="1">Itachi</option>
         <option value="2">Sasuke</option>
         <option value="3">Pain</option>
     </select>
 
-    <button id="fightBtn" onclick="initiateFight()">SAVAŞI BAŞLAT</button>
+    <button onclick="initiateFight()">SAVAŞI BAŞLAT</button>
     
-    <div id="result">Karakterini seç ve savaş!</div>
+    <div id="result">Karakterini seç!</div>
 </div>
 
 <div class="signature">DEVELOPED BY THE ARCHITECT MUSTAFA</div>
@@ -131,8 +112,26 @@
 <script>
     let audioUnlocked = false;
 
+    // Karakter değiştikçe Rinnegan'ı kontrol eden fonksiyon
+    function checkVisuals() {
+        const c1 = document.getElementById("char1").value;
+        const c2 = document.getElementById("char2").value;
+        const rinnegan = document.getElementById("rinnegan");
+
+        // Eğer karakterlerden biri Pain (index 3) ise Rinnegan'ı göster, değilse gizle
+        if (c1 === "3" || c2 === "3") {
+            rinnegan.style.display = "flex";
+            document.body.style.background = "#0d0a12"; // Hafif morumsu hava
+        } else {
+            rinnegan.style.display = "none";
+            document.body.style.background = "#050505"; // Standart siyah
+        }
+    }
+
+    // İlk açılışta kontrol et
+    checkVisuals();
+
     function initiateFight() {
-        // İlk tıklamada seslerin kilidini aç
         if (!audioUnlocked) {
             for (let i = 0; i < 4; i++) {
                 let s = document.getElementById("s-" + i);
@@ -155,7 +154,6 @@
             return; 
         }
 
-        // Mevcut sesleri durdur
         for(let i=0; i<4; i++) {
             let s = document.getElementById("s-" + i);
             s.pause(); s.currentTime = 0;
@@ -165,20 +163,14 @@
         res.style.color = "#ffcc00";
         
         setTimeout(() => {
-            // Şans faktörü
             const winnerIdx = Math.random() > 0.5 ? c1 : c2;
             res.innerText = "🔥 KAZANAN: " + names[winnerIdx];
             res.style.color = "#00ffb3";
 
             const sound = document.getElementById("s-" + winnerIdx);
-            if(sound) {
-                sound.play().catch(err => {
-                    console.log("Ses oynatılamadı, tekrar dene.");
-                });
-            }
+            if(sound) sound.play();
         }, 800);
     }
 </script>
-
 </body>
 </html>

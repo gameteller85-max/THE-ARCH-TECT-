@@ -1,139 +1,243 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <title>Architect Zenith V11</title>
-    <style>
-        :root { --accent: #ff3333; --p1: #111; --p2: #111; }
-        body { margin:0; height:100vh; background:#000; color:#fff; font-family:'JetBrains Mono', monospace; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+<meta charset="UTF-8">
+<title>Architect FIXED CORE</title>
 
-        /* Arka Plan Efekt Katmanları */
-        #bg-canvas { position:fixed; inset:0; background: radial-gradient(circle at center, var(--p1) 0%, #000 70%); z-index:1; opacity:0.6; }
-        #fx-layer { position:fixed; inset:0; z-index:2; pointer-events:none; }
+<style>
+:root{
+  --accent:#fff;
+  --p1:#111;
+  --p2:#111;
+}
 
-        .viewport { position:relative; width:90%; max-width:480px; background:rgba(10,10,10,0.9); border:1px solid #222; padding:30px; border-radius:40px; z-index:10; backdrop-filter: blur(20px); }
-        
-        /* Karakter Alanları */
-        .arena { display:flex; justify-content:space-between; gap:15px; margin-bottom:30px; }
-        .slot { flex:1; aspect-ratio:3/4; background:#050505; border:2px solid #111; border-radius:25px; overflow:hidden; position:relative; transition:0.5s; }
-        .slot img { width:100%; height:100%; object-fit:cover; opacity:0; transition:0.8s; }
-        .slot.loaded img { opacity:0.7; }
-        .slot.winner { border-color: var(--accent); box-shadow: 0 0 40px var(--accent); transform: scale(1.05); }
-        .slot.winner img { opacity:1; filter: contrast(1.2); }
+body{
+  margin:0;
+  height:100vh;
+  background:#000;
+  color:#fff;
+  font-family:monospace;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
 
-        /* UI */
-        .controls { display:flex; flex-direction:column; gap:10px; }
-        select, button { background:#080808; color:#fff; border:1px solid #222; padding:15px; border-radius:15px; font-family:inherit; font-weight:bold; outline:none; }
-        button { background:var(--accent); color:#000; border:none; text-transform:uppercase; letter-spacing:3px; cursor:pointer; margin-top:10px; }
-        button:disabled { opacity:0.2; cursor:not-allowed; }
+/* FX */
+#fx{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1;
+}
 
-        /* Rinnegan Efekti */
-        .rinne-ring { position:absolute; border:1px solid #9955ff; border-radius:50%; left:50%; top:50%; transform:translate(-50%,-50%); animation: ring-out 3s infinite; }
-        @keyframes ring-out { 0% {width:0; height:0; opacity:1;} 100% {width:800px; height:800px; opacity:0;} }
-        
-        .shake { animation: shake-anim 0.1s infinite; }
-        @keyframes shake-anim { 0%{transform:translate(2px)} 100%{transform:translate(-2px)} }
-    </style>
+.ring{
+  position:absolute;
+  border:2px solid rgba(170,102,255,0.3);
+  border-radius:50%;
+  width:200px;
+  height:200px;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  animation:pulse 3s infinite;
+}
+
+@keyframes pulse{
+  0%{transform:translate(-50%,-50%) scale(0.5);opacity:0.5}
+  100%{transform:translate(-50%,-50%) scale(2);opacity:0}
+}
+
+.viewport{
+  width:420px;
+  background:#0a0a0a;
+  padding:30px;
+  border-radius:20px;
+  border:1px solid #222;
+  z-index:2;
+}
+
+.arena{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:20px;
+}
+
+.card{
+  width:45%;
+  aspect-ratio:3/4;
+  background:#111;
+  border-radius:10px;
+  overflow:hidden;
+  border:1px solid #222;
+}
+
+.card img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  opacity:0;
+  filter:grayscale(1);
+  transition:0.4s;
+}
+
+.card.active img{
+  opacity:1;
+}
+
+.card.winner{
+  border-color:gold;
+  transform:scale(1.05);
+}
+
+select,button{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  background:#111;
+  color:#fff;
+  border:1px solid #333;
+}
+
+button{
+  background:#fff;
+  color:#000;
+  font-weight:bold;
+  cursor:pointer;
+}
+button:disabled{
+  opacity:0.3;
+}
+</style>
 </head>
+
 <body>
 
-<div id="bg-canvas"></div>
-<div id="fx-layer"></div>
+<div id="fx"></div>
 
-<div class="viewport" id="app">
-    <div class="arena">
-        <div class="slot" id="s0"><img id="i0"></div>
-        <div class="slot" id="s1"><img id="i1"></div>
-    </div>
-    <div class="controls">
-        <select id="sel0" onchange="Zenith.update(0, this.value)"></select>
-        <select id="sel1" onchange="Zenith.update(1, this.value)"></select>
-        <button id="run-btn" onclick="Zenith.battle()">INITIALIZE COMBAT</button>
-    </div>
+<div class="viewport">
+  <div class="arena">
+    <div class="card" id="c1"><img id="i1"></div>
+    <div class="card" id="c2"><img id="i2"></div>
+  </div>
+
+  <select id="p1"></select>
+  <select id="p2"></select>
+
+  <button id="fight">FIGHT</button>
+
+  <p id="txt">READY</p>
 </div>
 
 <script>
-/**
- * ARCHITECT ZENITH V11
- * Sorun Çözümü: Asset Güvenliği + Doğrudan Ses Tetikleme + Optimize Edilmiş FX
- */
 
-const DATA = {
-    units: {
-        itachi: { name: "ITACHI", pwr: 94, color: "#ff3333", img: "https://i.ibb.co/L5rK5Q8/itachi.jpg", sfx: "https://www.myinstants.com/media/sounds/itachi-shisui-susanoo.mp3" },
-        pain: { name: "PAIN", pwr: 98, color: "#9955ff", img: "https://i.ibb.co/mS7xZ8M/pain.jpg", sfx: "https://www.myinstants.com/media/sounds/shinra-tensei.mp3", hasFX: true },
-        sasuke: { name: "SASUKE", pwr: 92, color: "#00eeff", img: "https://i.ibb.co/vYm6sF4/sasuke.jpg", sfx: "https://www.myinstants.com/media/sounds/chidori-sound-effect.mp3" },
-        naruto: { name: "NARUTO", pwr: 90, color: "#ffaa00", img: "https://i.ibb.co/K2Nf6X2/naruto.jpg", sfx: "https://www.myinstants.com/media/sounds/naruto-uzumaki-dattebayo.mp3" }
-    }
+const DB = {
+  itachi:{p:94,img:"https://i.ibb.co/L5rK5Q8/itachi.jpg"},
+  pain:{p:96,img:"https://i.ibb.co/mS7xZ8M/pain.jpg"},
+  naruto:{p:88,img:"https://i.ibb.co/K2Nf6X2/naruto.jpg"},
+  sasuke:{p:91,img:"https://i.ibb.co/vYm6sF4/sasuke.jpg"}
 };
 
-const Zenith = (() => {
-    let state = { p: ['itachi', 'pain'], busy: false };
-    const audio = new Audio();
+let state = {
+  p1:"itachi",
+  p2:"pain",
+  busy:false
+};
 
-    const render = () => {
-        state.p.forEach((id, i) => {
-            const u = DATA.units[id];
-            const slot = document.getElementById(`s${i}`);
-            const img = document.getElementById(`i${i}`);
-            
-            img.src = u.img;
-            img.onload = () => slot.classList.add('loaded');
-            img.onerror = () => { img.src = "https://via.placeholder.com/300x400?text=ASSET_ERR"; };
-            
-            if (i === 0) document.body.style.setProperty('--p1', u.color);
-            if (u.hasFX) {
-                document.getElementById('fx-layer').innerHTML = '<div class="rinne-ring"></div><div class="rinne-ring" style="animation-delay:1s"></div>';
-            } else if (!state.p.some(px => DATA.units[px].hasFX)) {
-                document.getElementById('fx-layer').innerHTML = '';
-            }
-        });
+// preload cache
+const cache = {};
+
+function loadImg(key){
+  return new Promise(res=>{
+    if(cache[key]) return res(cache[key]);
+    const img = new Image();
+    img.src = DB[key].img;
+    img.onload=()=>{
+      cache[key]=img.src;
+      res(img.src);
     };
+    img.onerror=()=>res("");
+  });
+}
 
-    return {
-        init: () => {
-            const s0 = document.getElementById('sel0');
-            const s1 = document.getElementById('sel1');
-            Object.keys(DATA.units).forEach(k => {
-                const opt = `<option value="${k}">${DATA.units[k].name}</option>`;
-                s0.innerHTML += opt; s1.innerHTML += opt;
-            });
-            s0.value = state.p[0]; s1.value = state.p[1];
-            render();
-        },
-        update: (i, val) => {
-            state.p[i] = val;
-            document.querySelectorAll('.slot').forEach(s => s.classList.remove('winner', 'loaded'));
-            render();
-        },
-        battle: () => {
-            if (state.busy) return;
-            state.busy = true;
-            document.getElementById('run-btn').disabled = true;
-            document.getElementById('app').classList.add('shake');
+function render(){
+  const i1=document.getElementById("i1");
+  const i2=document.getElementById("i2");
 
-            setTimeout(() => {
-                const u0 = DATA.units[state.p[0]];
-                const u1 = DATA.units[state.p[1]];
-                const winIdx = (u0.pwr * Math.random()) > (u1.pwr * Math.random()) ? 0 : 1;
-                const winner = DATA.units[state.p[winIdx]];
+  loadImg(state.p1).then(src=>{
+    i1.src=src;
+    document.getElementById("c1").classList.add("active");
+  });
 
-                document.getElementById(`s${winIdx}`).classList.add('winner');
-                document.body.style.setProperty('--accent', winner.color);
-                
-                // Ses Motoru - Doğrudan Erişim
-                audio.src = winner.sfx;
-                audio.play().catch(e => console.log("Ses hatası"));
+  loadImg(state.p2).then(src=>{
+    i2.src=src;
+    document.getElementById("c2").classList.add("active");
+  });
+}
 
-                state.busy = false;
-                document.getElementById('run-btn').disabled = false;
-                document.getElementById('app').classList.remove('shake');
-            }, 1000);
-        }
-    };
-})();
+function updateFX(){
+  const fx=document.getElementById("fx");
+  fx.innerHTML="";
 
-window.onload = Zenith.init;
+  if(state.p1==="pain"||state.p2==="pain"){
+    fx.innerHTML=`<div class="ring"></div>`;
+  }
+}
+
+function fight(){
+  if(state.busy) return;
+  state.busy=true;
+
+  const txt=document.getElementById("txt");
+  txt.innerText="FIGHTING...";
+
+  document.getElementById("c1").classList.remove("winner");
+  document.getElementById("c2").classList.remove("winner");
+
+  setTimeout(()=>{
+
+    const a=DB[state.p1].p + Math.random()*10;
+    const b=DB[state.p2].p + Math.random()*10;
+
+    const win = a>b?0:1;
+
+    const winKey = win===0?state.p1:state.p2;
+
+    document.getElementById("txt").innerText="WINNER: "+winKey.toUpperCase();
+    document.getElementById("txt").style.color="gold";
+
+    document.getElementById(win===0?"c1":"c2").classList.add("winner");
+
+    state.busy=false;
+
+  },1200);
+}
+
+// init
+function init(){
+  const p1=document.getElementById("p1");
+  const p2=document.getElementById("p2");
+
+  Object.keys(DB).forEach(k=>{
+    p1.innerHTML+=`<option value="${k}">${k}</option>`;
+    p2.innerHTML+=`<option value="${k}">${k}</option>`;
+  });
+
+  p1.value=state.p1;
+  p2.value=state.p2;
+
+  p1.onchange=e=>{state.p1=e.target.value;render();updateFX();}
+  p2.onchange=e=>{state.p2=e.target.value;render();updateFX();}
+
+  document.getElementById("fight").onclick=fight;
+
+  render();
+  updateFX();
+}
+
+init();
+
 </script>
+
 </body>
 </html>

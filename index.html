@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Efsanevi Karşılaşma v2.0</title>
+    <title>Efsanevi Karşılaşma v2.1 - Pain Güncellemesi</title>
 </head>
 <body>
 
@@ -12,7 +12,7 @@
 
     <div class="selection-area">
         <select id="char1"></select>
-        <span style="color: white; font-weight: bold;">VS</span>
+        <span style="color: white; font-weight: bold; margin: 0 10px;">VS</span>
         <select id="char2"></select>
     </div>
 
@@ -45,9 +45,8 @@
         text-align: center;
         width: 90%;
         max-width: 450px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.7);
-        border: 2px solid #333;
-        transition: transform 0.2s;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+        border: 2px solid #444;
     }
 
     h2 {
@@ -59,7 +58,7 @@
 
     .selection-area {
         display: flex;
-        justify-content: space-around;
+        justify-content: center;
         align-items: center;
         margin-bottom: 20px;
     }
@@ -68,7 +67,7 @@
         padding: 12px;
         background: #2a2a2a;
         color: white;
-        border: 1px solid #444;
+        border: 1px solid #555;
         border-radius: 8px;
         outline: none;
         cursor: pointer;
@@ -86,38 +85,36 @@
         cursor: pointer;
         width: 100%;
         transition: 0.3s;
-        box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
+        box-shadow: 0 5px 15px rgba(255, 68, 68, 0.4);
     }
 
     button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(255, 68, 68, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255, 68, 68, 0.6);
     }
-
-    button:active { transform: translateY(1px); }
 
     #result {
         margin-top: 30px;
         color: #aaa;
         font-size: 18px;
         min-height: 24px;
-        transition: all 0.3s;
     }
 
-    /* EFEKTLER */
+    /* KAZANAN YAZISI EFEKTİ */
     .win-text {
-        color: #00ffcc !important;
+        color: #ffcc00 !important;
         font-size: 22px !important;
-        text-shadow: 0 0 10px #00ffcc;
+        text-shadow: 0 0 15px #ffcc00;
+        font-weight: bold;
         animation: pulse 1s infinite;
     }
 
     @keyframes pulse {
-        0% { transform: scale(1); }
+        0%, 100% { transform: scale(1); }
         50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
     }
 
+    /* KUTU SARSILMA EFEKTİ */
     .shake {
         animation: shakeAnim 0.4s ease-in-out;
     }
@@ -131,11 +128,12 @@
 </style>
 
 <script>
-    // Karakter Verileri
+    // Karakterler ve Güç Sıralamaları (Senin için ayarlandı)
     const characters = [
         { name: "Naruto", power: 92, speed: 88, iq: 75 },
         { name: "Itachi", power: 85, speed: 92, iq: 98 },
-        { name: "Sasuke", power: 90, speed: 90, iq: 88 }
+        { name: "Sasuke", power: 90, speed: 90, iq: 88 },
+        { name: "Pain", power: 95, speed: 82, iq: 90 } // Pain artık burada!
     ];
 
     const s1 = document.getElementById("char1");
@@ -144,20 +142,15 @@
     const box = document.querySelector(".vs-box");
     const winSound = document.getElementById("winSound");
 
-    // Select kutularını güvenli bir şekilde doldur
+    // Sayfa açıldığında seçim listesini otomatik doldurur
     function init() {
+        s1.innerHTML = "";
+        s2.innerHTML = "";
         characters.forEach((char, index) => {
-            let opt1 = document.createElement("option");
-            opt1.value = index;
-            opt1.text = char.name;
-            s1.add(opt1);
-
-            let opt2 = document.createElement("option");
-            opt2.value = index;
-            opt2.text = char.name;
-            s2.add(opt2);
+            s1.add(new Option(char.name, index));
+            s2.add(new Option(char.name, index));
         });
-        s2.selectedIndex = 1; // Başlangıçta farklı karakter seçili olsun
+        s2.selectedIndex = 3; // Başlangıçta Pain seçili gelsin
     }
 
     function fight() {
@@ -170,9 +163,8 @@
             return;
         }
 
-        // Butonu geçici olarak devre dışı bırak (spam engelleme)
         const btn = document.getElementById("fightBtn");
-        btn.disabled = true;
+        btn.disabled = true; // Spam engelleme
 
         resultEl.classList.remove("win-text");
         resultEl.style.color = "#eee";
@@ -182,29 +174,29 @@
             const c1 = characters[val1];
             const c2 = characters[val2];
 
-            // Gelişmiş Güç Hesaplama
-            let p1 = (c1.power * 0.5) + (c1.speed * 0.3) + (c1.iq * 0.2) + (Math.random() * 10);
-            let p2 = (c2.power * 0.5) + (c2.speed * 0.3) + (c2.iq * 0.2) + (Math.random() * 10);
+            // Güç Hesaplama Mantığı (Özellikler + Şans)
+            let score1 = (c1.power * 0.5) + (c1.speed * 0.3) + (c1.iq * 0.2) + (Math.random() * 15);
+            let score2 = (c2.power * 0.5) + (c2.speed * 0.3) + (c2.iq * 0.2) + (Math.random() * 15);
 
-            let winner = p1 > p2 ? c1.name : c2.name;
+            let winner = score1 > score2 ? c1.name : c2.name;
 
             resultEl.innerText = "🔥 Kazanan: " + winner;
             resultEl.classList.add("win-text");
             box.classList.add("shake");
 
-            // Sesi çal (Hata kontrolü ile)
+            // Ses Çalma
             winSound.currentTime = 0;
-            winSound.play().catch(e => console.log("Ses çalma engellendi: ", e));
+            winSound.play().catch(() => console.log("Ses çalma başlatılamadı."));
 
             setTimeout(() => {
                 box.classList.remove("shake");
                 btn.disabled = false;
-            }, 400);
+            }, 500);
 
         }, 800);
     }
 
-    // Başlat
+    // Uygulamayı Başlat
     init();
 </script>
 

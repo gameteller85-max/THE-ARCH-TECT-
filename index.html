@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Efsanevi Karşılaşma v4.0 - All Stars Edition</title>
+    <title>The Architect - Mastery Edition v4.2</title>
 </head>
 <body>
 
@@ -30,7 +30,6 @@
 <audio id="sound-itachi" src="https://www.myinstants.com/media/sounds/itachi-susanoo.mp3" preload="auto"></audio>
 <audio id="sound-naruto" src="https://www.myinstants.com/media/sounds/dattebayo.mp3" preload="auto"></audio>
 <audio id="sound-sasuke" src="https://www.myinstants.com/media/sounds/chidori-sound-effect.mp3" preload="auto"></audio>
-<audio id="generic-win" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto"></audio>
 
 <style>
     * { box-sizing: border-box; }
@@ -44,66 +43,47 @@
         height: 100vh;
         margin: 0;
         overflow: hidden;
-        transition: background 0.8s ease; /* Arka plan geçişi yumuşak olsun */
+        transition: background 1.2s ease; /* Daha akışkan geçiş */
     }
-
     .signature { position: fixed; bottom: 20px; color: #444; font-size: 11px; letter-spacing: 2px; font-weight: bold; z-index: 10; }
     .architect-name { color: #666; transition: 0.5s; }
     .signature:hover .architect-name { color: #ff4444; text-shadow: 0 0 10px #ff4444; }
-
+    
     #quote-box {
-        position: fixed; top: -120px; left: 50%; transform: translateX(-50%);
+        position: fixed; top: -150px; left: 50%; transform: translateX(-50%);
         background: rgba(0, 0, 0, 0.95); padding: 15px 40px;
         border-radius: 0 0 25px 25px; border: 2px solid #333; font-style: italic;
-        font-size: 22px; font-weight: bold; z-index: 100;
-        transition: top 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        text-align: center; white-space: nowrap;
+        font-size: 20px; font-weight: bold; z-index: 100; transition: top 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-align: center; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
     #quote-box.show { top: 0; }
 
     #rinnegan-bg {
         position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        width: 350vw; height: 350vh; opacity: 0; z-index: -1; transition: opacity 1s ease;
+        width: 350vw; height: 350vh; opacity: 0; z-index: -1; transition: opacity 1.5s ease;
         background: repeating-radial-gradient(circle, #1a0d26 0%, #1a0d26 8%, #4b3d61 9%, #4b3d61 10%, #1a0d26 11%);
     }
 
-    .vs-box { background: rgba(26, 26, 26, 0.92); padding: 30px; border-radius: 20px; text-align: center; width: 90%; max-width: 450px; border: 2px solid #333; z-index: 10; }
+    .vs-box { background: rgba(26, 26, 26, 0.95); padding: 30px; border-radius: 20px; text-align: center; width: 90%; max-width: 450px; border: 1px solid #444; z-index: 10; box-shadow: 0 0 40px rgba(0,0,0,0.8); }
     h2 { color: #fff; margin-bottom: 25px; }
-
-    select { padding: 12px; background: #333; color: white; border-radius: 10px; width: 42%; outline: none; border: 1px solid #555; }
+    
+    select { padding: 12px; background: #333; color: white; border-radius: 10px; width: 42%; border: 1px solid #555; outline: none; }
     button { background: linear-gradient(45deg, #ff4444, #cc0000); color: white; padding: 15px; border: none; border-radius: 50px; font-weight: bold; width: 100%; cursor: pointer; transition: 0.3s; }
-    button:hover { transform: scale(1.03); filter: brightness(1.2); }
-
-    #result { margin-top: 30px; color: #ddd; font-size: 20px; font-weight: bold; }
+    button:hover { transform: scale(1.02); filter: brightness(1.2); }
+    
+    #result { margin-top: 30px; color: #ddd; font-size: 20px; font-weight: bold; min-height: 24px; }
     .win-text { color: #ffcc00 !important; text-shadow: 0 0 20px #ffcc00; }
-
+    
     .shake-heavy { animation: shake-heavy 0.8s; }
-    @keyframes shake-heavy {
-        0%, 100% { transform: translate(0,0); }
-        25% { transform: translate(-10px, 10px); }
-        50% { transform: translate(10px, -10px); }
-        75% { transform: translate(-10px, -10px); }
-    }
+    @keyframes shake-heavy { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-8px, 8px); } 50% { transform: translate(8px, -8px); } 75% { transform: translate(-5px, 5px); } }
 </style>
 
 <script>
     const characters = [
-        { 
-            name: "Naruto", power: 92, speed: 88, iq: 75,
-            quote: "Vazgeçmeyeceğim, bu benim yolum!", color: "#4d2600", soundId: "sound-naruto"
-        },
-        { 
-            name: "Itachi", power: 85, speed: 92, iq: 98,
-            quote: "Affet Sasuke, bir dahaki sefere...", color: "#260000", soundId: "sound-itachi"
-        },
-        { 
-            name: "Sasuke", power: 90, speed: 90, iq: 88,
-            quote: "Gözlerim karanlığı net görebiliyor.", color: "#000026", soundId: "sound-sasuke"
-        },
-        { 
-            name: "Pain", power: 95, speed: 82, iq: 90,
-            quote: "Dünya acıyı anlayacak...", color: "#1a0d26", soundId: "sound-pain"
-        }
+        { name: "Naruto", power: 92, speed: 88, iq: 75, quote: "Vazgeçmeyeceğim, bu benim yolum!", color: "#4d2600", sound: "sound-naruto" },
+        { name: "Itachi", power: 85, speed: 92, iq: 98, quote: "Affet Sasuke, bir dahaki sefere...", color: "#260000", sound: "sound-itachi" },
+        { name: "Sasuke", power: 90, speed: 90, iq: 88, quote: "Gözlerim karanlığı net görüyor.", color: "#000026", sound: "sound-sasuke" },
+        { name: "Pain", power: 95, speed: 82, iq: 90, quote: "Dünya acıyı anlayacak...", color: "#1a0d26", sound: "sound-pain" }
     ];
 
     const s1 = document.getElementById("char1");
@@ -127,7 +107,7 @@
         const val2 = parseInt(s2.value);
         if (val1 === val2) { resultEl.innerText = "❌ Aynı karakter olmaz!"; return; }
 
-        // --- SIFIRLAMA VE TEMİZLİK ---
+        // --- TAM TEMİZLİK SÜRECİ ---
         rinnegan.style.opacity = "0";
         quoteBox.classList.remove("show");
         resultEl.classList.remove("win-text"); 
@@ -136,33 +116,39 @@
         resultEl.innerText = "⚡ Çakralar çarpışıyor...";
 
         setTimeout(() => {
-            const c1 = characters[val1];
-            const c2 = characters[val2];
-            let p1 = (c1.power * 0.5) + (c1.speed * 0.3) + (c1.iq * 0.2) + (Math.random() * 20);
-            let p2 = (c2.power * 0.5) + (c2.speed * 0.3) + (c2.iq * 0.2) + (Math.random() * 20);
+            const char1 = characters[val1];
+            const char2 = characters[val2];
             
-            const winnerObj = p1 > p2 ? c1 : c2;
+            // Güç hesaplama (IQ ve Hız çarpanları eklendi)
+            const p1Score = (char1.power * 0.4) + (char1.speed * 0.2) + (char1.iq * 0.2) + (Math.random() * 25);
+            const p2Score = (char2.power * 0.4) + (char2.speed * 0.2) + (char2.iq * 0.2) + (Math.random() * 25);
+            
+            const winner = p1Score > p2Score ? char1 : char2;
 
-            resultEl.innerText = "🔥 Kazanan: " + winnerObj.name;
+            resultEl.innerText = "🔥 Kazanan: " + winner.name;
             resultEl.classList.add("win-text");
 
-            // KARAKTERE ÖZEL REPLİK VE RENK AYARI
-            quoteBox.innerText = `"${winnerObj.quote}"`;
-            quoteBox.style.color = (winnerObj.name === "Pain" || winnerObj.name === "Itachi") ? "#ff4444" : "#ffcc00";
+            // --- GÖRSEL TETİKLEYİCİLER ---
+            quoteBox.innerText = `"${winner.quote}"`;
             quoteBox.classList.add("show");
-            document.body.style.background = winnerObj.color;
+            document.body.style.background = winner.color;
 
-            // PAIN'E ÖZEL RİNNEGAN VE SARSINTI
-            if (winnerObj.name === "Pain") {
+            if (winner.name === "Pain") {
                 rinnegan.style.opacity = "1";
                 box.classList.add("shake-heavy");
             }
 
-            // SESİ TETİKLE
-            const activeSound = document.getElementById(winnerObj.soundId);
-            if (activeSound) {
-                activeSound.currentTime = 0;
-                activeSound.play().catch(e => console.log("Ses çalmadı:", e));
+            // --- SES TETİKLEYİCİ (Gelişmiş) ---
+            const sound = document.getElementById(winner.sound);
+            if(sound) {
+                sound.currentTime = 0;
+                // Promise tabanlı ses çalma (Tarayıcı hatalarını önler)
+                let playPromise = sound.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log("Ses çalma engellendi, etkileşim bekleniyor.");
+                    });
+                }
             }
 
             setTimeout(() => box.classList.remove("shake-heavy"), 800);

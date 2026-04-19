@@ -1,55 +1,54 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mimar | Anime Arşivi</title>
-    <style>
-        body { background-color: #121212; color: #ffffff; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .header { text-align: left; width: 100%; max-width: 400px; margin-bottom: 20px; }
-        h1 { color: #ff4b5c; font-size: 2.5em; margin: 0; }
-        .card { background: #1e1e1e; padding: 20px; border-radius: 15px; border-left: 5px solid #ff4b5c; margin-bottom: 20px; width: 100%; max-width: 360px; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .stats { color: #ff4b5c; font-size: 1.5em; font-weight: bold; margin: 10px 0; }
-        .progress-bg { background: #2e2e2e; height: 8px; border-radius: 4px; width: 100%; }
-        .progress-fill { background: #ff4b5c; height: 100%; border-radius: 4px; width: 38%; } /* %38 ayarı */
-        .info-text { color: #bbbbbb; font-size: 0.9em; margin-top: 10px; }
-        .character-box { border-bottom: 1px dashed #333; padding-bottom: 10px; margin-bottom: 10px; }
-        .character-box:last-child { border: none; }
-    </style>
-</head>
-<body>
+<div style="margin-top:30px; padding:25px; background:#1a1a1a; border-radius:15px; border: 1px solid #333; font-family: sans-serif; text-align: center; color: white;">
 
-    <div class="header">
-        <p style="color:#bbbbbb; margin:0;">İyi akşamlar</p>
-        <h1>Mimar</h1>
-    </div>
+    <h2 style="color: #ff4444; letter-spacing: 1px; margin-bottom: 20px;">⚔️ Efsanevi Karşılaşma</h2>
 
-    <div class="card">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <span style="color:#ff4b5c;">✔️</span> <strong>Görev Tamamlama</strong>
+    <div style="display: flex; justify-content: space-around; margin-bottom: 20px; font-size: 0.9em;">
+        <div style="text-align: left; padding: 10px; border-left: 3px solid #ffa500; background: #222; border-radius: 5px; width: 40%;">
+            <b style="color:#ffa500;">Uzumaki Naruto</b><br>
+            <span style="font-size: 0.8em; opacity: 0.8;">Güç: 90 | Hız: 85 | Zeka: 70</span>
         </div>
-        <div class="stats">% 38</div>
-        <div class="progress-bg">
-            <div class="progress-fill"></div>
-        </div>
-        <div class="info-text">8 görevden 3'ü tamamlandı.</div>
-    </div>
-
-    <div class="card">
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
-            <span style="color:#ff4b5c;">🔥</span> <strong>Karakter Arşivi</strong>
-        </div>
-        
-        <div class="character-box">
-            <div style="color:#ff4b5c; font-weight:bold;">Uchiha Itachi</div>
-            <div class="info-text">Akatsuki üyesi, Sharingan ustası.</div>
-        </div>
-
-        <div class="character-box">
-            <div style="color:#ff4b5c; font-weight:bold;">Uzumaki Naruto</div>
-            <div class="info-text">7. Hokage, Kyuubi Jinchuriki.</div>
+        <div style="text-align: left; padding: 10px; border-left: 3px solid #ff4444; background: #222; border-radius: 5px; width: 40%;">
+            <b style="color:#ff4444;">Uchiha Itachi</b><br>
+            <span style="font-size: 0.8em; opacity: 0.8;">Güç: 88 | Hız: 90 | Zeka: 95</span>
         </div>
     </div>
 
-</body>
-</html>
+    <button onclick="fightNI()" style="cursor: pointer; width: 80%; padding: 12px; border: none; border-radius: 10px; background: #ff4444; color: white; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(255, 68, 68, 0.2);">
+        SAVAŞI BAŞLAT
+    </button>
+
+    <div id="resultBoxNI" style="margin-top:20px; min-height: 40px; border-top: 1px solid #333; padding-top: 15px;">
+        <p id="resultNI" style="font-size: 1.2em; font-weight: bold; margin: 0;"></p>
+    </div>
+
+</div>
+
+<script>
+function fightNI() {
+    const resultElement = document.getElementById("resultNI");
+    
+    // Küçük bir bekleme efekti (Heyecan katar)
+    resultElement.style.opacity = "0.5";
+    resultElement.innerText = "⚡ Çakralar çarpışıyor...";
+
+    setTimeout(() => {
+        // Senin orijinal hesaplama mantığın
+        let naruto = 90 + 85 + 70 + Math.random() * 20;
+        let itachi = 88 + 90 + 95 + Math.random() * 20;
+
+        let resultText;
+        resultElement.style.opacity = "1";
+
+        if (naruto > itachi) {
+            resultText = "<span style='color: #ffa500;'>🔥 Kazanan: Naruto</span>";
+        } else if (itachi > naruto) {
+            resultText = "<span style='color: #ff4444;'>🔥 Kazanan: Itachi</span>";
+        } else {
+            resultText = "<span style='color: #888;'>⚖️ Berabere!</span>";
+        }
+
+        resultElement.innerHTML = resultText;
+    }, 500); 
+}
+               </script>
+               

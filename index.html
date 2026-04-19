@@ -3,187 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Architect - Final Arena</title>
+    <title>Architect Nexus - V8</title>
     <style>
-        :root {
-            --pain-color: #b38cff;
-            --naruto-color: #ffcc00;
-            --itachi-color: #ff4444;
-            --sasuke-color: #00d9ff;
-            --bg-dark: #050505;
-        }
+        :root { --p1: #0a0a0a; --p2: #0a0a0a; --accent: #fff; --font: 'JetBrains Mono', monospace; }
+        body { margin:0; height:100vh; background:#000; color:#fff; font-family: var(--font); display:flex; align-items:center; justify-content:center; overflow:hidden; }
 
-        body {
-            margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center;
-            background: var(--bg-dark); color: white; font-family: 'Segoe UI', Tahoma, sans-serif;
-            overflow: hidden; transition: 0.8s ease;
-        }
+        /* Reactive Environment */
+        #nexus-bg { position:fixed; inset:0; background: linear-gradient(135deg, var(--p1), #000 50%, var(--p2)); opacity:0.25; transition: 1.5s; pointer-events:none; z-index:1; }
+        
+        .viewport { position:relative; width:95%; max-width:500px; background:rgba(5,5,5,0.95); border:1px solid #1a1a1a; padding:40px; border-radius:40px; backdrop-filter:blur(120px); z-index:10; box-shadow: 0 50px 100px rgba(0,0,0,0.8); }
+        
+        /* Grid System */
+        .arena { display:flex; justify-content:space-between; align-items:center; margin-bottom:40px; gap:10px; }
+        .slot { flex:1; aspect-ratio:3/4; background:#080808; border:1px solid #222; border-radius:24px; overflow:hidden; transition:0.8s cubic-bezier(0.16, 1, 0.3, 1); position:relative; }
+        .slot img { width:100%; height:100%; object-fit:cover; opacity:0; transition:1s; filter:grayscale(1) contrast(0.7); transform: scale(1.1); }
+        
+        /* State Indicators */
+        .slot.active img { opacity:0.6; transform: scale(1); }
+        .slot.winner { transform:translateY(-20px); border-color:var(--accent); box-shadow:0 0 50px var(--accent); z-index:5; }
+        .slot.winner img { opacity:1; filter:grayscale(0); transform: scale(1.05); }
 
-        /* Başlatma Perdesi (Mobil Ses Kilidini Açar) */
-        #gate {
-            position: fixed; inset: 0; background: black; z-index: 1000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.5s;
-        }
-        #gate h2 { border: 1px solid white; padding: 15px 30px; letter-spacing: 4px; animation: pulse 1.5s infinite; }
-
-        /* Arka Plan Efektleri */
-        .rinnegan-bg {
-            position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
-            z-index: -1; opacity: 0.2; pointer-events: none;
-        }
-        .ring { position: absolute; border: 2px solid var(--pain-color); border-radius: 50%; box-shadow: 0 0 40px var(--pain-color); }
-        .r1 { width: 100px; height: 100px; animation: spin 8s linear infinite; }
-        .r2 { width: 600px; height: 600px; animation: spinReverse 20s linear infinite; }
-
-        /* Ana Kutu */
-        .vs-box {
-            background: rgba(15, 15, 15, 0.9); padding: 25px; border-radius: 20px;
-            width: 90%; max-width: 420px; border: 1px solid #333;
-            backdrop-filter: blur(15px); box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            text-align: center; z-index: 10;
-        }
-
-        .arena { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 15px; margin-bottom: 20px; }
-        .card { border-radius: 12px; overflow: hidden; border: 2px solid #222; aspect-ratio: 3/4; background: #111; transition: 0.4s; }
-        .card img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(60%); transition: 0.5s; }
-        .active-winner { border-color: gold !important; transform: scale(1.05); box-shadow: 0 0 30px gold; }
-        .active-winner img { filter: grayscale(0%) contrast(1.1); }
-
-        select { width: 100%; padding: 12px; background: #1a1a1a; color: white; border: 1px solid #444; border-radius: 8px; margin-bottom: 10px; }
-        button {
-            width: 100%; padding: 16px; border-radius: 8px; background: #d00; color: white;
-            border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
-        }
-        button:active { transform: scale(0.98); }
-
-        #result-text { margin-top: 15px; font-size: 20px; font-weight: bold; min-height: 28px; }
-
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes spinReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
-        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
-        .shake { animation: shake 0.1s infinite; }
-        @keyframes shake { 0%{transform: translate(2px,2px)} 50%{transform: translate(-2px,-2px)} 100%{transform: translate(0)} }
+        .controls { display:flex; flex-direction:column; gap:12px; }
+        select, button { background:#111; color:#fff; border:1px solid #222; padding:18px; border-radius:18px; font-family:var(--font); font-weight:700; transition:0.3s; appearance:none; text-align-last: center; }
+        button { background:var(--accent); color:#000; text-transform:uppercase; cursor:pointer; margin-top:15px; border:none; letter-spacing:3px; }
+        button:disabled { opacity:0.1; filter: grayscale(1); cursor:not-allowed; }
+        
+        #status { font-size:10px; text-align:center; margin-top:30px; color:#444; letter-spacing:4px; font-weight:100; text-transform:uppercase; }
+        
+        .battle-shake { animation: nexusShake 0.1s infinite alternate; }
+        @keyframes nexusShake { from{transform:translate(2px,0)} to{transform:translate(-2px,0)} }
     </style>
 </head>
 <body>
 
-<div id="gate" onclick="unlockSystem()">
-    <h2>SİSTEMİ BAŞLAT</h2>
-    <p>Ses ve Görseller Yükleniyor...</p>
-</div>
+<div id="nexus-bg"></div>
 
-<div class="rinnegan-bg" id="rinnegan">
-    <div class="ring r1"></div><div class="ring r2"></div>
-</div>
-
-<div class="vs-box" id="arenaBox">
-    <h3 style="margin-top:0; letter-spacing:2px; color:#888;">THE ARCHITECT ARENA</h3>
+<div class="viewport">
     <div class="arena">
-        <div class="card" id="card1"><img id="img1" src=""></div>
-        <div style="font-weight:900; font-size:24px; color:#444;">VS</div>
-        <div class="card" id="card2"><img id="img2" src=""></div>
+        <div class="slot" id="slot-0"><img id="img-0"></div>
+        <div style="opacity:0.05; font-size:24px; font-weight:100;">LOGIC_CORE</div>
+        <div class="slot" id="slot-1"><img id="img-1"></div>
     </div>
 
-    <div style="display:flex; gap:10px;">
-        <select id="p1" onchange="render()"></select>
-        <select id="p2" onchange="render()"></select>
+    <div class="controls">
+        <select id="sel-0" onchange="Nexus.dispatch('SET_PLAYER', {idx: 0, key: this.value})"></select>
+        <select id="sel-1" onchange="Nexus.dispatch('SET_PLAYER', {idx: 1, key: this.value})"></select>
+        <button id="main-cta" onclick="Nexus.dispatch('START_BATTLE')">Initialize Combat</button>
     </div>
 
-    <button onclick="startFight()">Savaşı Başlat</button>
-    <div id="result-text">Rakipleri Belirle</div>
+    <div id="status">System_Stable</div>
 </div>
 
 <script>
-    // Karakter Veritabanı (Görseller senin attıklarınla eşleşecek şekilde ayarlandı)
-    const db = {
-        "itachi": { name: "Itachi Uchiha", power: 92, color: "#ff4444", img: "https://i.ibb.co/VvzS0vC/itachi.jpg", sound: "https://www.myinstants.com/media/sounds/itachi-shisui-susanoo.mp3" },
-        "pain": { name: "Pain Nagato", power: 95, color: "#b38cff", img: "https://i.ibb.co/XW3sK3s/pain.jpg", sound: "https://www.myinstants.com/media/sounds/shinra-tensei.mp3" },
-        "naruto": { name: "Naruto Uzumaki", power: 88, color: "#ffcc00", img: "https://i.ibb.co/fN8L0vL/naruto.jpg", sound: "https://www.myinstants.com/media/sounds/naruto-uzumaki-dattebayo.mp3" },
-        "sasuke": { name: "Sasuke Uchiha", power: 89, color: "#00d9ff", img: "https://i.ibb.co/5G7G7zS/sasuke.jpg", sound: "https://www.myinstants.com/media/sounds/chidori-sound-effect.mp3" }
+/**
+ * ARCHITECT NEXUS V8
+ * Principles: Proxied State, Resource Pooling, Deterministic Engine
+ */
+
+const CONFIG = {
+    UNITS: {
+        itachi: { name: "ITACHI", pwr: 94, hex: "#ff3333", src: "https://i.pinimg.com/736x/0a/63/03/0a6303274291f0821a7a599d702d58d1a.jpg", sfx: "https://www.myinstants.com/media/sounds/itachi-shisui-susanoo.mp3" },
+        pain: { name: "PAIN", pwr: 96, hex: "#aa66ff", src: "https://i.pinimg.com/736x/88/4a/c0/884ac06b00192b02e604f686c47144e5.jpg", sfx: "https://www.myinstants.com/media/sounds/shinra-tensei.mp3" },
+        naruto: { name: "NARUTO", pwr: 88, hex: "#ffcc00", src: "https://i.pinimg.com/736x/5a/22/02/5a2202674e2d24266c253b26c36199a3.jpg", sfx: "https://www.myinstants.com/media/sounds/naruto-uzumaki-dattebayo.mp3" },
+        sasuke: { name: "SASUKE", pwr: 91, hex: "#00eeff", src: "https://i.pinimg.com/736x/a2/28/7d/a2287da6403063f905d64860b8756a1b.jpg", sfx: "https://www.myinstants.com/media/sounds/chidori-sound-effect.mp3" }
+    }
+};
+
+const Nexus = (() => {
+    // 1. Audio Pool
+    const _audioChannel = new Audio();
+
+    // 2. Reactive State (Proxy)
+    const _state = new Proxy({
+        players: ['itachi', 'pain'],
+        isBusy: false,
+        winner: null,
+        abortCtrl: new AbortController()
+    }, {
+        set(target, prop, value) {
+            target[prop] = value;
+            _render(); // Her değişimde otomatik render
+            return true;
+        }
+    });
+
+    // 3. UI Sync (Refined)
+    const _render = async () => {
+        const { players, isBusy, winner, abortCtrl } = _state;
+        const btn = document.getElementById('main-cta');
+        const status = document.getElementById('status');
+        
+        // UI Locking
+        btn.disabled = isBusy || players[0] === players[1];
+        status.innerText = isBusy ? "Analyzing_Data_Streams..." : "System_Ready";
+        document.querySelector('.viewport').classList.toggle('battle-shake', isBusy);
+
+        // Symm Aura
+        document.documentElement.style.setProperty('--p1', CONFIG.UNITS[players[0]].hex + "44");
+        document.documentElement.style.setProperty('--p2', CONFIG.UNITS[players[1]].hex + "44");
+
+        // Sync Slots
+        players.forEach((key, idx) => {
+            const slot = document.getElementById(`slot-${idx}`);
+            const img = document.getElementById(`img-${idx}`);
+            
+            slot.classList.remove('active', 'winner');
+            if (winner === idx) {
+                slot.classList.add('winner');
+                document.documentElement.style.setProperty('--accent', CONFIG.UNITS[key].hex);
+            }
+
+            // High-Speed Asset Sync
+            const loader = new Image();
+            loader.src = CONFIG.UNITS[key].src;
+            loader.onload = () => {
+                if (!abortCtrl.signal.aborted) {
+                    img.src = loader.src;
+                    slot.classList.add('active');
+                }
+            };
+        });
     };
 
-    const sel1 = document.getElementById("p1");
-    const sel2 = document.getElementById("p2");
-    let audios = {};
+    // 4. Combat Logic (Deterministic Chance)
+    const _calculate = () => {
+        const u1 = CONFIG.UNITS[_state.players[0]];
+        const u2 = CONFIG.UNITS[_state.players[1]];
+        const diff = u1.pwr - u2.pwr;
+        const weightedChance = 50 + (diff * 4.5); // Her 1 pwr = %4.5 avantaj
+        return (Math.random() * 100) < weightedChance ? 0 : 1;
+    };
 
-    // Başlatma ve Ses Kilidi Açma
-    function unlockSystem() {
-        document.getElementById("gate").style.opacity = "0";
-        setTimeout(() => document.getElementById("gate").remove(), 500);
-        
-        // Sesleri önceden yükle (Mobil uyum için şart)
-        Object.keys(db).forEach(key => {
-            audios[key] = new Audio(db[key].sound);
-            audios[key].load();
-        });
-    }
+    return {
+        init() {
+            const selects = [document.getElementById('sel-0'), document.getElementById('sel-1')];
+            Object.keys(CONFIG.UNITS).forEach(k => {
+                selects.forEach(s => s.innerHTML += `<option value="${k}">${CONFIG.UNITS[k].name}</option>`);
+            });
+            selects[0].value = _state.players[0];
+            selects[1].value = _state.players[1];
+            _render();
+        },
 
-    // Select Menülerini Doldur
-    Object.keys(db).forEach(key => {
-        sel1.innerHTML += `<option value="${key}">${db[key].name}</option>`;
-        sel2.innerHTML += `<option value="${key}">${db[key].name}</option>`;
-    });
-    sel1.value = "pain"; sel2.value = "itachi";
+        dispatch(action, payload) {
+            switch(action) {
+                case 'SET_PLAYER':
+                    _state.abortCtrl.abort();
+                    _state.abortCtrl = new AbortController();
+                    _state.players[payload.idx] = payload.key;
+                    _state.winner = null;
+                    break;
 
-    function render() {
-        const char1 = db[sel1.value];
-        const char2 = db[sel2.value];
-        
-        document.getElementById("img1").src = char1.img;
-        document.getElementById("img2").src = char2.img;
-
-        // Rinnegan & Atmosfer Kontrolü
-        const r = document.getElementById("rinnegan");
-        if(sel1.value === "pain" || sel2.value === "pain") {
-            r.style.display = "flex";
-            document.body.style.background = "#0f0816";
-        } else {
-            r.style.display = "none";
-            document.body.style.background = "#050505";
-        }
-    }
-
-    function startFight() {
-        const id1 = sel1.value; const id2 = sel2.value;
-        const res = document.getElementById("result-text");
-        const box = document.getElementById("arenaBox");
-
-        if(id1 === id2) {
-            res.innerText = "Aynı kişiler savaşamaz!";
-            res.style.color = "red";
-            return;
-        }
-
-        res.innerText = "Çakralar çarpışıyor...";
-        res.style.color = "white";
-        box.classList.add("shake");
-
-        setTimeout(() => {
-            box.classList.remove("shake");
-            
-            // Gelişmiş Denge Algoritması
-            const roll1 = db[id1].power + (Math.random() * 20);
-            const roll2 = db[id2].power + (Math.random() * 20);
-            const winnerId = roll1 > roll2 ? id1 : id2;
-
-            res.innerText = "🏆 KAZANAN: " + db[winnerId].name;
-            res.style.color = db[winnerId].color;
-
-            // Görseli Parlat
-            const winCard = winnerId === id1 ? "card1" : "card2";
-            document.getElementById(winCard).classList.add("active-winner");
-            setTimeout(() => document.getElementById(winCard).classList.remove("active-winner"), 2500);
-
-            // Ses Oynat
-            if(audios[winnerId]) {
-                audios[winnerId].currentTime = 0;
-                audios[winnerId].play();
+                case 'START_BATTLE':
+                    if(_state.isBusy) return;
+                    _state.isBusy = true;
+                    _state.winner = null;
+                    
+                    setTimeout(() => {
+                        const winIdx = _calculate();
+                        _state.winner = winIdx;
+                        _state.isBusy = false;
+                        
+                        _audioChannel.src = CONFIG.UNITS[_state.players[winIdx]].sfx;
+                        _audioChannel.play().catch(() => {});
+                    }, 1500);
+                    break;
             }
-        }, 1200);
-    }
+        }
+    };
+})();
 
-    render();
+// Initialize
+window.onload = () => Nexus.init();
 </script>
 </body>
 </html>

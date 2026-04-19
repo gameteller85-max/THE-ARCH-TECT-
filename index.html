@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Efsanevi Karşılaşma v3.1 - Final Control</title>
+    <title>Efsanevi Karşılaşma v3.2 - Clean Engine</title>
 </head>
 <body>
 
@@ -102,9 +102,11 @@
         const val2 = parseInt(s2.value);
         if (val1 === val2) { resultEl.innerText = "❌ Aynı karakter olmaz!"; return; }
 
-        // Sıfırla
+        // --- SIFIRLAMA VE TEMİZLİK ---
         rinnegan.style.opacity = "0";
         quoteBox.classList.remove("show");
+        resultEl.classList.remove("win-text"); 
+        box.classList.remove("shake-heavy");  
         document.body.style.background = "#0d0d0d";
         resultEl.innerText = "⚡ Çakralar çarpışıyor...";
 
@@ -124,10 +126,9 @@
                 quoteBox.classList.add("show");
                 box.classList.add("shake-heavy");
                 
-                // SES KONTROLÜ
                 const voice = document.getElementById("shinraTensei");
-                voice.currentTime = 0; // Baştan başla
-                voice.play().catch(e => console.log("Ses çalma hatası:", e));
+                voice.currentTime = 0;
+                voice.play().catch(e => console.log("Ses hatası:", e));
             } else {
                 document.getElementById("winSound").play().catch(() => {});
             }

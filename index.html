@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Efsanevi Karşılaşma v2.3 - Shinra Tensei</title>
+    <title>Efsanevi Karşılaşma v2.4 - Pain Quotes</title>
 </head>
 <body>
 
 <div id="rinnegan-bg"></div>
+
+<div id="quote-box">"Dünya acıyı anlayacak..."</div>
 
 <div class="vs-box">
     <h2>⚔️ Efsanevi Karşılaşma</h2>
@@ -32,48 +34,67 @@
     
     body {
         background-color: #0d0d0d;
-        font-family: sans-serif;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
         margin: 0;
         overflow: hidden;
-        transition: background 0.5s;
+        transition: background 0.6s ease;
     }
 
-    /* RİNNEGAN EFEKTİ - BU SEFER DAHA NET VE GÖRÜNÜR */
+    /* PAIN SÖZÜ KUTUSU TASARIMI */
+    #quote-box {
+        position: fixed;
+        top: -120px; /* Ekranın dışına sakla */
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(20, 10, 30, 0.95);
+        color: #ff3333;
+        padding: 15px 40px;
+        border-radius: 0 0 25px 25px;
+        border: 2px solid #4b3d61;
+        border-top: none;
+        font-style: italic;
+        font-size: 22px;
+        font-weight: bold;
+        text-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+        z-index: 100;
+        transition: top 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    }
+
+    /* SÖZÜ GÖSTEREN SINIF */
+    #quote-box.show {
+        top: 0; /* Aşağı indir */
+    }
+
+    /* RİNNEGAN ARKA PLAN */
     #rinnegan-bg {
         position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 300vw;
-        height: 300vh;
-        /* Daha koyu ve keskin mor halkalar */
-        background: repeating-radial-gradient(
-            circle,
-            #1a0d26 0%,
-            #1a0d26 10%,
-            #4b3d61 11%,
-            #4b3d61 12%,
-            #1a0d26 13%
-        );
-        opacity: 0; /* Başlangıçta gizli */
+        width: 350vw;
+        height: 350vh;
+        background: repeating-radial-gradient(circle, #1a0d26 0%, #1a0d26 8%, #4b3d61 9%, #4b3d61 10%, #1a0d26 11%);
+        opacity: 0;
         z-index: -1;
-        transition: opacity 0.5s ease-in-out;
+        transition: opacity 0.8s ease;
     }
 
     .vs-box {
-        background: #1a1a1a;
+        background: rgba(26, 26, 26, 0.92);
         padding: 30px;
         border-radius: 20px;
         text-align: center;
         width: 90%;
         max-width: 450px;
-        box-shadow: 0 0 30px rgba(0,0,0,1);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.9);
         border: 2px solid #333;
         z-index: 10;
+        backdrop-filter: blur(10px);
     }
 
     h2 { color: #fff; margin-bottom: 25px; }
@@ -90,12 +111,13 @@
         background: #333;
         color: white;
         border: 1px solid #555;
-        border-radius: 8px;
+        border-radius: 10px;
         width: 42%;
+        outline: none;
     }
 
     button {
-        background: #ff4444;
+        background: linear-gradient(45deg, #ff4444, #cc0000);
         color: white;
         padding: 15px;
         border: none;
@@ -103,29 +125,31 @@
         font-weight: bold;
         width: 100%;
         cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
     }
+
+    button:hover { transform: scale(1.02); }
 
     #result {
         margin-top: 30px;
-        color: #eee;
+        color: #ddd;
         font-size: 20px;
         font-weight: bold;
+        transition: 0.3s;
     }
 
-    /* KAZANAN PARLAMASI */
     .win-text {
         color: #ffcc00 !important;
         text-shadow: 0 0 20px #ffcc00;
     }
 
-    /* SARSILMA EFEKTİ */
-    .shake {
-        animation: shake 0.4s;
-    }
+    .shake { animation: shake 0.4s; }
     @keyframes shake {
-        0% { transform: translate(1px, 1px); }
-        50% { transform: translate(-3px, 2px); }
-        100% { transform: translate(0, 0); }
+        0%, 100% { transform: translate(0,0); }
+        25% { transform: translate(-5px, 5px); }
+        50% { transform: translate(5px, -5px); }
+        75% { transform: translate(-5px, -5px); }
     }
 </style>
 
@@ -141,15 +165,18 @@
     const s2 = document.getElementById("char2");
     const resultEl = document.getElementById("result");
     const rinnegan = document.getElementById("rinnegan-bg");
+    const quoteBox = document.getElementById("quote-box");
     const box = document.querySelector(".vs-box");
 
     function init() {
+        s1.innerHTML = "";
+        s2.innerHTML = "";
         characters.forEach((char, index) => {
             s1.add(new Option(char.name, index));
             s2.add(new Option(char.name, index));
         });
-        s1.selectedIndex = 3; // Pain
-        s2.selectedIndex = 1; // Itachi
+        s1.selectedIndex = 3; // Sol Pain
+        s2.selectedIndex = 1; // Sağ Itachi
     }
 
     function fight() {
@@ -157,23 +184,29 @@
         const val2 = parseInt(s2.value);
 
         if (val1 === val2) {
-            resultEl.innerText = "❌ Aynı karakter olmaz!";
+            resultEl.innerText = "❌ Aynı karakterler savaşamaz!";
+            resultEl.style.color = "#ff4444";
             return;
         }
 
-        // Efektleri Temizle
+        const btn = document.getElementById("fightBtn");
+        btn.disabled = true;
+
+        // Her şeyi sıfırla
         rinnegan.style.opacity = "0";
+        quoteBox.classList.remove("show");
         document.body.style.background = "#0d0d0d";
         resultEl.classList.remove("win-text");
-        
-        resultEl.innerText = "⚡ Savaş başlıyor...";
+        resultEl.style.color = "#ddd";
+        resultEl.innerText = "⚡ Çakralar çarpışıyor...";
 
         setTimeout(() => {
             const c1 = characters[val1];
             const c2 = characters[val2];
 
-            let score1 = (c1.power * 0.5) + (c1.speed * 0.3) + (c1.iq * 0.2) + (Math.random() * 20);
-            let score2 = (c2.power * 0.5) + (c2.speed * 0.3) + (c2.iq * 0.2) + (Math.random() * 20);
+            // Güç Dengesi + Şans Faktörü
+            let score1 = (c1.power * 0.5) + (c1.speed * 0.3) + (c1.iq * 0.2) + (Math.random() * 15);
+            let score2 = (c2.power * 0.5) + (c2.speed * 0.3) + (c2.iq * 0.2) + (Math.random() * 15);
 
             let winner = score1 > score2 ? c1.name : c2.name;
 
@@ -181,19 +214,21 @@
             resultEl.classList.add("win-text");
             box.classList.add("shake");
 
-            // EĞER PAİN KAZANIRSA RİNNEGAN'I PATLAT
+            // ÖZEL: Pain Kazandıysa Efektleri Patlat
             if (winner === "Pain") {
-                rinnegan.style.opacity = "1"; // GÖRÜNÜR YAP
-                document.body.style.background = "#1a0d26"; // ARKA PLANI DEĞİŞTİR
+                rinnegan.style.opacity = "1";
+                document.body.style.background = "#1a0d26";
+                quoteBox.classList.add("show"); // Sözü yukarıdan indir
             }
 
             document.getElementById("winSound").play().catch(() => {});
 
             setTimeout(() => {
                 box.classList.remove("shake");
+                btn.disabled = false;
             }, 500);
 
-        }, 800);
+        }, 850);
     }
 
     init();

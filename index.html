@@ -2,179 +2,195 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Architect Nexus - V8</title>
+    <title>Architect Obsidian V10 - Pure Architecture</title>
     <style>
-        :root { --p1: #0a0a0a; --p2: #0a0a0a; --accent: #fff; --font: 'JetBrains Mono', monospace; }
-        body { margin:0; height:100vh; background:#000; color:#fff; font-family: var(--font); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+        :root { --accent: #fff; --bg: #000; --font: 'JetBrains Mono', monospace; }
+        body { margin:0; height:100vh; background:var(--bg); color:#fff; font-family:var(--font); display:flex; align-items:center; justify-content:center; overflow:hidden; }
 
-        /* Reactive Environment */
-        #nexus-bg { position:fixed; inset:0; background: linear-gradient(135deg, var(--p1), #000 50%, var(--p2)); opacity:0.25; transition: 1.5s; pointer-events:none; z-index:1; }
-        
-        .viewport { position:relative; width:95%; max-width:500px; background:rgba(5,5,5,0.95); border:1px solid #1a1a1a; padding:40px; border-radius:40px; backdrop-filter:blur(120px); z-index:10; box-shadow: 0 50px 100px rgba(0,0,0,0.8); }
-        
-        /* Grid System */
-        .arena { display:flex; justify-content:space-between; align-items:center; margin-bottom:40px; gap:10px; }
-        .slot { flex:1; aspect-ratio:3/4; background:#080808; border:1px solid #222; border-radius:24px; overflow:hidden; transition:0.8s cubic-bezier(0.16, 1, 0.3, 1); position:relative; }
-        .slot img { width:100%; height:100%; object-fit:cover; opacity:0; transition:1s; filter:grayscale(1) contrast(0.7); transform: scale(1.1); }
-        
-        /* State Indicators */
-        .slot.active img { opacity:0.6; transform: scale(1); }
-        .slot.winner { transform:translateY(-20px); border-color:var(--accent); box-shadow:0 0 50px var(--accent); z-index:5; }
-        .slot.winner img { opacity:1; filter:grayscale(0); transform: scale(1.05); }
+        /* Optimized Layers */
+        #fx-layer { position:fixed; inset:0; z-index:1; pointer-events:none; }
+        .viewport { position:relative; width:92%; max-width:520px; background:rgba(5,5,5,0.98); border:1px solid #111; padding:40px; border-radius:45px; z-index:10; }
 
+        /* Component States */
+        .arena { display:grid; grid-template-columns: 1fr 40px 1fr; gap:20px; margin-bottom:40px; }
+        .slot { aspect-ratio:3/4; background:#030303; border:1px solid #111; border-radius:30px; overflow:hidden; position:relative; transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1); }
+        .slot img { width:100%; height:100%; object-fit:cover; opacity:0; transition: 1s; filter: grayscale(1); }
+        
+        /* State Reflectors */
+        .slot[data-state="ready"] img { opacity:0.4; filter: grayscale(0.6); }
+        .slot[data-state="winner"] { transform: translateY(-10px); border-color: var(--accent); box-shadow: 0 0 50px -10px var(--accent); }
+        .slot[data-state="winner"] img { opacity:1; filter: grayscale(0); }
+
+        /* UI Elements */
         .controls { display:flex; flex-direction:column; gap:12px; }
-        select, button { background:#111; color:#fff; border:1px solid #222; padding:18px; border-radius:18px; font-family:var(--font); font-weight:700; transition:0.3s; appearance:none; text-align-last: center; }
-        button { background:var(--accent); color:#000; text-transform:uppercase; cursor:pointer; margin-top:15px; border:none; letter-spacing:3px; }
-        button:disabled { opacity:0.1; filter: grayscale(1); cursor:not-allowed; }
-        
-        #status { font-size:10px; text-align:center; margin-top:30px; color:#444; letter-spacing:4px; font-weight:100; text-transform:uppercase; }
-        
-        .battle-shake { animation: nexusShake 0.1s infinite alternate; }
-        @keyframes nexusShake { from{transform:translate(2px,0)} to{transform:translate(-2px,0)} }
+        .select-wrapper { position:relative; }
+        select, button { width:100%; background:#080808; color:#fff; border:1px solid #1a1a1a; padding:20px; border-radius:20px; font-family:inherit; font-weight:700; cursor:pointer; outline:none; transition:0.3s; }
+        button { background:var(--accent); color:#000; border:none; text-transform:uppercase; letter-spacing:4px; margin-top:20px; }
+        button:disabled { filter: grayscale(1); opacity:0.1; }
+
+        /* FX Components */
+        .rinnegan-ring { position:absolute; border:1px solid var(--fx-color); border-radius:50%; left:50%; top:50%; transform:translate(-50%,-50%); animation: obsidian-pulse 4s infinite linear; opacity:0; }
+        @keyframes obsidian-pulse { 0% {width:0; height:0; opacity:0.5;} 100% {width:1000px; height:1000px; opacity:0;} }
     </style>
 </head>
 <body>
 
-<div id="nexus-bg"></div>
+<div id="fx-layer"></div>
 
-<div class="viewport">
+<div class="viewport" id="nexus">
     <div class="arena">
-        <div class="slot" id="slot-0"><img id="img-0"></div>
-        <div style="opacity:0.05; font-size:24px; font-weight:100;">LOGIC_CORE</div>
-        <div class="slot" id="slot-1"><img id="img-1"></div>
+        <div class="slot" id="slot-0" data-idx="0"><img></div>
+        <div style="display:flex; align-items:center; justify-content:center; opacity:0.1; font-size:12px;">VS</div>
+        <div class="slot" id="slot-1" data-idx="1"><img></div>
     </div>
 
-    <div class="controls">
-        <select id="sel-0" onchange="Nexus.dispatch('SET_PLAYER', {idx: 0, key: this.value})"></select>
-        <select id="sel-1" onchange="Nexus.dispatch('SET_PLAYER', {idx: 1, key: this.value})"></select>
-        <button id="main-cta" onclick="Nexus.dispatch('START_BATTLE')">Initialize Combat</button>
+    <div class="controls" id="ui-root">
+        <div class="select-wrapper"><select data-action="change-player" data-pidx="0"></select></div>
+        <div class="select-wrapper"><select data-action="change-player" data-pidx="1"></select></div>
+        <button data-action="initiate-battle" id="battle-btn">Run Engine</button>
     </div>
-
-    <div id="status">System_Stable</div>
 </div>
 
 <script>
 /**
- * ARCHITECT NEXUS V8
- * Principles: Proxied State, Resource Pooling, Deterministic Engine
+ * ARCHITECT OBSIDIAN V10
+ * Concept: Immutable Architecture, Deterministic Probability, FX Registry
  */
 
-const CONFIG = {
+// 1. DATA & FX REGISTRY
+const REGISTRY = {
     UNITS: {
-        itachi: { name: "ITACHI", pwr: 94, hex: "#ff3333", src: "https://i.pinimg.com/736x/0a/63/03/0a6303274291f0821a7a599d702d58d1a.jpg", sfx: "https://www.myinstants.com/media/sounds/itachi-shisui-susanoo.mp3" },
-        pain: { name: "PAIN", pwr: 96, hex: "#aa66ff", src: "https://i.pinimg.com/736x/88/4a/c0/884ac06b00192b02e604f686c47144e5.jpg", sfx: "https://www.myinstants.com/media/sounds/shinra-tensei.mp3" },
-        naruto: { name: "NARUTO", pwr: 88, hex: "#ffcc00", src: "https://i.pinimg.com/736x/5a/22/02/5a2202674e2d24266c253b26c36199a3.jpg", sfx: "https://www.myinstants.com/media/sounds/naruto-uzumaki-dattebayo.mp3" },
-        sasuke: { name: "SASUKE", pwr: 91, hex: "#00eeff", src: "https://i.pinimg.com/736x/a2/28/7d/a2287da6403063f905d64860b8756a1b.jpg", sfx: "https://www.myinstants.com/media/sounds/chidori-sound-effect.mp3" }
-    }
+        itachi: { name: "ITACHI", pwr: 94, hex: "#ff2222", src: "https://i.ibb.co/L5rK5Q8/itachi.jpg", fx: [] },
+        pain: { name: "PAIN", pwr: 96, hex: "#9955ff", src: "https://i.ibb.co/mS7xZ8M/pain.jpg", fx: ['rinnegan'] },
+        sasuke: { name: "SASUKE", pwr: 91, hex: "#00ccff", src: "https://i.ibb.co/vYm6sF4/sasuke.jpg", fx: [] },
+        naruto: { name: "NARUTO", pwr: 88, hex: "#ffaa00", src: "https://i.ibb.co/K2Nf6X2/naruto.jpg", fx: [] }
+    },
+    EFFECTS: {
+        rinnegan: (color) => `<div class="rinnegan-ring" style="--fx-color:${color}"></div>`
+    },
+    ASSET_CACHE: new Map()
 };
 
-const Nexus = (() => {
-    // 1. Audio Pool
-    const _audioChannel = new Audio();
-
-    // 2. Reactive State (Proxy)
-    const _state = new Proxy({
+// 2. IMMUTABLE ENGINE
+const Engine = (() => {
+    let _state = Object.freeze({
         players: ['itachi', 'pain'],
         isBusy: false,
         winner: null,
-        abortCtrl: new AbortController()
-    }, {
-        set(target, prop, value) {
-            target[prop] = value;
-            _render(); // Her değişimde otomatik render
-            return true;
-        }
+        lastAction: null
     });
 
-    // 3. UI Sync (Refined)
-    const _render = async () => {
-        const { players, isBusy, winner, abortCtrl } = _state;
-        const btn = document.getElementById('main-cta');
-        const status = document.getElementById('status');
-        
-        // UI Locking
-        btn.disabled = isBusy || players[0] === players[1];
-        status.innerText = isBusy ? "Analyzing_Data_Streams..." : "System_Ready";
-        document.querySelector('.viewport').classList.toggle('battle-shake', isBusy);
+    const _subscribers = [];
 
-        // Symm Aura
-        document.documentElement.style.setProperty('--p1', CONFIG.UNITS[players[0]].hex + "44");
-        document.documentElement.style.setProperty('--p2', CONFIG.UNITS[players[1]].hex + "44");
-
-        // Sync Slots
-        players.forEach((key, idx) => {
-            const slot = document.getElementById(`slot-${idx}`);
-            const img = document.getElementById(`img-${idx}`);
-            
-            slot.classList.remove('active', 'winner');
-            if (winner === idx) {
-                slot.classList.add('winner');
-                document.documentElement.style.setProperty('--accent', CONFIG.UNITS[key].hex);
-            }
-
-            // High-Speed Asset Sync
-            const loader = new Image();
-            loader.src = CONFIG.UNITS[key].src;
-            loader.onload = () => {
-                if (!abortCtrl.signal.aborted) {
-                    img.src = loader.src;
-                    slot.classList.add('active');
-                }
-            };
-        });
-    };
-
-    // 4. Combat Logic (Deterministic Chance)
-    const _calculate = () => {
-        const u1 = CONFIG.UNITS[_state.players[0]];
-        const u2 = CONFIG.UNITS[_state.players[1]];
-        const diff = u1.pwr - u2.pwr;
-        const weightedChance = 50 + (diff * 4.5); // Her 1 pwr = %4.5 avantaj
-        return (Math.random() * 100) < weightedChance ? 0 : 1;
+    const _reducer = (state, action) => {
+        switch(action.type) {
+            case 'SET_PLAYER':
+                const newPlayers = [...state.players];
+                newPlayers[action.idx] = action.key;
+                return { ...state, players: newPlayers, winner: null, lastAction: 'PLAYER_CHANGE' };
+            case 'START_BATTLE':
+                return { ...state, isBusy: true, winner: null, lastAction: 'BATTLE_START' };
+            case 'RESOLVE_BATTLE':
+                return { ...state, isBusy: false, winner: action.winner, lastAction: 'BATTLE_END' };
+            default: return state;
+        }
     };
 
     return {
-        init() {
-            const selects = [document.getElementById('sel-0'), document.getElementById('sel-1')];
-            Object.keys(CONFIG.UNITS).forEach(k => {
-                selects.forEach(s => s.innerHTML += `<option value="${k}">${CONFIG.UNITS[k].name}</option>`);
-            });
-            selects[0].value = _state.players[0];
-            selects[1].value = _state.players[1];
-            _render();
+        dispatch: (action) => {
+            _state = Object.freeze(_reducer(_state, action));
+            _subscribers.forEach(fn => fn(_state));
         },
-
-        dispatch(action, payload) {
-            switch(action) {
-                case 'SET_PLAYER':
-                    _state.abortCtrl.abort();
-                    _state.abortCtrl = new AbortController();
-                    _state.players[payload.idx] = payload.key;
-                    _state.winner = null;
-                    break;
-
-                case 'START_BATTLE':
-                    if(_state.isBusy) return;
-                    _state.isBusy = true;
-                    _state.winner = null;
-                    
-                    setTimeout(() => {
-                        const winIdx = _calculate();
-                        _state.winner = winIdx;
-                        _state.isBusy = false;
-                        
-                        _audioChannel.src = CONFIG.UNITS[_state.players[winIdx]].sfx;
-                        _audioChannel.play().catch(() => {});
-                    }, 1500);
-                    break;
-            }
-        }
+        subscribe: (fn) => _subscribers.push(fn),
+        getState: () => _state
     };
 })();
 
-// Initialize
-window.onload = () => Nexus.init();
+// 3. UI CONTROLLER (Virtual-ish DOM)
+const UI = {
+    init: () => {
+        const selects = document.querySelectorAll('select');
+        Object.keys(REGISTRY.UNITS).forEach(k => {
+            selects.forEach(s => s.innerHTML += `<option value="${k}">${REGISTRY.UNITS[k].name}</option>`);
+        });
+        selects[0].value = Engine.getState().players[0];
+        selects[1].value = Engine.getState().players[1];
+
+        // Centralized Event Delegation
+        document.addEventListener('change', (e) => {
+            if(e.target.dataset.action === 'change-player') {
+                Engine.dispatch({ type: 'SET_PLAYER', idx: parseInt(e.target.dataset.pidx), key: e.target.value });
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if(e.target.dataset.action === 'initiate-battle') UI.handleBattle();
+        });
+
+        Engine.subscribe(UI.render);
+        UI.render(Engine.getState());
+    },
+
+    handleBattle: () => {
+        Engine.dispatch({ type: 'START_BATTLE' });
+        setTimeout(() => {
+            const state = Engine.getState();
+            const u1 = REGISTRY.UNITS[state.players[0]];
+            const u2 = REGISTRY.UNITS[state.players[1]];
+            
+            // Deterministic Weighted Probability
+            const total = u1.pwr + u2.pwr;
+            const threshold = (u1.pwr / total) * 100;
+            const winner = (Math.random() * 100) < threshold ? 0 : 1;
+            
+            Engine.dispatch({ type: 'RESOLVE_BATTLE', winner });
+        }, 1500);
+    },
+
+    render: (state) => {
+        const fxLayer = document.getElementById('fx-layer');
+        const btn = document.getElementById('battle-btn');
+
+        btn.disabled = state.isBusy;
+        
+        state.players.forEach((key, i) => {
+            const unit = REGISTRY.UNITS[key];
+            const slot = document.getElementById(`slot-${i}`);
+            const img = slot.querySelector('img');
+
+            // Asset Cache Control
+            if (!REGISTRY.ASSET_CACHE.has(unit.src)) {
+                const loader = new Image();
+                loader.src = unit.src;
+                loader.onload = () => {
+                    REGISTRY.ASSET_CACHE.set(unit.src, true);
+                    img.src = unit.src;
+                    slot.setAttribute('data-state', 'ready');
+                };
+            } else {
+                img.src = unit.src;
+                slot.setAttribute('data-state', state.winner === i ? 'winner' : 'ready');
+            }
+
+            // Centralized FX Rendering (Only if Action is PLAYER_CHANGE or BATTLE_END)
+            if (state.lastAction === 'PLAYER_CHANGE' || i === 0) {
+                fxLayer.innerHTML = '';
+                state.players.forEach(pKey => {
+                    const pUnit = REGISTRY.UNITS[pKey];
+                    pUnit.fx.forEach(fxKey => {
+                        if (REGISTRY.EFFECTS[fxKey]) fxLayer.innerHTML += REGISTRY.EFFECTS[fxKey](pUnit.hex);
+                    });
+                });
+            }
+        });
+
+        if (state.winner !== null) {
+            document.documentElement.style.setProperty('--accent', REGISTRY.UNITS[state.players[state.winner]].hex);
+        }
+    }
+};
+
+UI.init();
 </script>
 </body>
 </html>

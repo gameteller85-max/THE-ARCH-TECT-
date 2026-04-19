@@ -1,132 +1,212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Efsanevi Karşılaşma v2.0</title>
+</head>
+<body>
+
 <div class="vs-box">
+    <h2>⚔️ Efsanevi Karşılaşma</h2>
 
-<h2>⚔️ Efsanevi Karşılaşma</h2>
+    <div class="selection-area">
+        <select id="char1"></select>
+        <span style="color: white; font-weight: bold;">VS</span>
+        <select id="char2"></select>
+    </div>
 
-<select id="char1"></select>
-<select id="char2"></select>
+    <br>
 
-<br>
+    <button id="fightBtn" onclick="fight()">SAVAŞ BAŞLAT</button>
 
-<button onclick="fight()">SAVAŞ BAŞLAT</button>
-
-<p id="result"></p>
-
+    <p id="result">Karakterini seç ve savaşı başlat!</p>
 </div>
 
-<audio id="winSound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
+<audio id="winSound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto"></audio>
 
 <style>
-.vs-box{
-  background:#1a1a1a;
-  padding:20px;
-  border-radius:15px;
-  text-align:center;
-  margin-top:30px;
-}
+    * { box-sizing: border-box; }
+    
+    body {
+        background-color: #0d0d0d;
+        font-family: 'Segoe UI', Roboto, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
 
-select, button{
-  padding:10px;
-  margin:10px;
-  border-radius:10px;
-  border:none;
-}
+    .vs-box {
+        background: #1a1a1a;
+        padding: 30px;
+        border-radius: 20px;
+        text-align: center;
+        width: 90%;
+        max-width: 450px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+        border: 2px solid #333;
+        transition: transform 0.2s;
+    }
 
-button{
-  background:#ff4444;
-  color:white;
-  cursor:pointer;
-}
+    h2 {
+        color: #fff;
+        font-size: 24px;
+        margin-bottom: 25px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
 
-button:hover{
-  background:#ff2222;
-}
+    .selection-area {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin-bottom: 20px;
+    }
 
-#result{
-  margin-top:20px;
-  font-weight:bold;
-  font-size:18px;
-}
+    select {
+        padding: 12px;
+        background: #2a2a2a;
+        color: white;
+        border: 1px solid #444;
+        border-radius: 8px;
+        outline: none;
+        cursor: pointer;
+        width: 40%;
+    }
 
-/* ANİMASYON */
-.win{
-  animation: glow 0.6s infinite alternate;
-}
+    button {
+        background: linear-gradient(45deg, #ff4444, #cc0000);
+        color: white;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 50px;
+        font-weight: bold;
+        font-size: 16px;
+        cursor: pointer;
+        width: 100%;
+        transition: 0.3s;
+        box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
+    }
 
-@keyframes glow{
-  from{ text-shadow:0 0 5px red; }
-  to{ text-shadow:0 0 20px orange; }
-}
+    button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(255, 68, 68, 0.5);
+    }
 
-/* TİTREŞİM */
-.shake{
-  animation: shake 0.3s;
-}
+    button:active { transform: translateY(1px); }
 
-@keyframes shake{
-  0%{transform:translateX(0);}
-  25%{transform:translateX(-5px);}
-  50%{transform:translateX(5px);}
-  75%{transform:translateX(-5px);}
-  100%{transform:translateX(0);}
-}
+    #result {
+        margin-top: 30px;
+        color: #aaa;
+        font-size: 18px;
+        min-height: 24px;
+        transition: all 0.3s;
+    }
+
+    /* EFEKTLER */
+    .win-text {
+        color: #00ffcc !important;
+        font-size: 22px !important;
+        text-shadow: 0 0 10px #00ffcc;
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    .shake {
+        animation: shakeAnim 0.4s ease-in-out;
+    }
+
+    @keyframes shakeAnim {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-8px); }
+        50% { transform: translateX(8px); }
+        75% { transform: translateX(-8px); }
+    }
 </style>
 
 <script>
+    // Karakter Verileri
+    const characters = [
+        { name: "Naruto", power: 92, speed: 88, iq: 75 },
+        { name: "Itachi", power: 85, speed: 92, iq: 98 },
+        { name: "Sasuke", power: 90, speed: 90, iq: 88 }
+    ];
 
-const characters = [
- {name:"Naruto", power:90, speed:85, iq:70},
- {name:"Itachi", power:88, speed:90, iq:95},
- {name:"Sasuke", power:89, speed:88, iq:80}
-];
+    const s1 = document.getElementById("char1");
+    const s2 = document.getElementById("char2");
+    const resultEl = document.getElementById("result");
+    const box = document.querySelector(".vs-box");
+    const winSound = document.getElementById("winSound");
 
-const s1 = document.getElementById("char1");
-const s2 = document.getElementById("char2");
-const resultEl = document.getElementById("result");
+    // Select kutularını güvenli bir şekilde doldur
+    function init() {
+        characters.forEach((char, index) => {
+            let opt1 = document.createElement("option");
+            opt1.value = index;
+            opt1.text = char.name;
+            s1.add(opt1);
 
-// SELECT DOLDUR
-characters.forEach((c,i)=>{
-  s1.add(new Option(c.name,i));
-  s2.add(new Option(c.name,i));
-});
+            let opt2 = document.createElement("option");
+            opt2.value = index;
+            opt2.text = char.name;
+            s2.add(opt2);
+        });
+        s2.selectedIndex = 1; // Başlangıçta farklı karakter seçili olsun
+    }
 
-function fight(){
+    function fight() {
+        const val1 = parseInt(s1.value);
+        const val2 = parseInt(s2.value);
 
-let c1 = characters[s1.value];
-let c2 = characters[s2.value];
+        if (val1 === val2) {
+            resultEl.innerText = "❌ Aynı karakterler savaşamaz!";
+            resultEl.style.color = "#ff4444";
+            return;
+        }
 
-if(s1.value === s2.value){
-  resultEl.innerText = "Aynı karakter seçilemez!";
-  return;
-}
+        // Butonu geçici olarak devre dışı bırak (spam engelleme)
+        const btn = document.getElementById("fightBtn");
+        btn.disabled = true;
 
-// küçük bekleme efekti
-resultEl.innerText = "⚡ Çakralar çarpışıyor...";
+        resultEl.classList.remove("win-text");
+        resultEl.style.color = "#eee";
+        resultEl.innerText = "⚡ Çakralar çarpışıyor...";
 
-// kısa delay
-setTimeout(()=>{
+        setTimeout(() => {
+            const c1 = characters[val1];
+            const c2 = characters[val2];
 
-let score1 = c1.power + c1.speed + c1.iq + Math.random()*20;
-let score2 = c2.power + c2.speed + c2.iq + Math.random()*20;
+            // Gelişmiş Güç Hesaplama
+            let p1 = (c1.power * 0.5) + (c1.speed * 0.3) + (c1.iq * 0.2) + (Math.random() * 10);
+            let p2 = (c2.power * 0.5) + (c2.speed * 0.3) + (c2.iq * 0.2) + (Math.random() * 10);
 
-let winner = score1 > score2 ? c1.name : c2.name;
+            let winner = p1 > p2 ? c1.name : c2.name;
 
-resultEl.innerText = "🔥 Kazanan: " + winner;
+            resultEl.innerText = "🔥 Kazanan: " + winner;
+            resultEl.classList.add("win-text");
+            box.classList.add("shake");
 
-// animasyon
-resultEl.classList.add("win");
-document.body.classList.add("shake");
+            // Sesi çal (Hata kontrolü ile)
+            winSound.currentTime = 0;
+            winSound.play().catch(e => console.log("Ses çalma engellendi: ", e));
 
-// ses
-document.getElementById("winSound").play();
+            setTimeout(() => {
+                box.classList.remove("shake");
+                btn.disabled = false;
+            }, 400);
 
-// temizleme
-setTimeout(()=>{
-  resultEl.classList.remove("win");
-  document.body.classList.remove("shake");
-},800);
+        }, 800);
+    }
 
-},400);
-
-}
-
+    // Başlat
+    init();
 </script>
+
+</body>
+</html>

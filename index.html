@@ -1,32 +1,3 @@
-
-function fightNI() {
-    const resultElement = document.getElementById("resultNI");
-    
-    // Küçük bir bekleme efekti (Heyecan katar)
-    resultElement.style.opacity = "0.5";
-    resultElement.innerText = "⚡ Çakralar çarpışıyor...";
-
-    setTimeout(() => {
-        // Senin orijinal hesaplama mantığın
-        let naruto = 90 + 85 + 70 + Math.random() * 20;
-        let itachi = 88 + 90 + 95 + Math.random() * 20;
-
-        let resultText;
-        resultElement.style.opacity = "1";
-
-        if (naruto > itachi) {
-            resultText = "<span style='color: #ffa500;'>🔥 Kazanan: Naruto</span>";
-        } else if (itachi > naruto) {
-            resultText = "<span style='color: #ff4444;'>🔥 Kazanan: Itachi</span>";
-        } else {
-            resultText = "<span style='color: #888;'>⚖️ Berabere!</span>";
-        }
-
-        resultElement.innerHTML = resultText;
-    }, 500); 
-}
-               </script>
-               
 <div class="vs-box">
 
 <h2>⚔️ Efsanevi Karşılaşma</h2>
@@ -112,6 +83,7 @@ const s1 = document.getElementById("char1");
 const s2 = document.getElementById("char2");
 const resultEl = document.getElementById("result");
 
+// SELECT DOLDUR
 characters.forEach((c,i)=>{
   s1.add(new Option(c.name,i));
   s2.add(new Option(c.name,i));
@@ -126,6 +98,12 @@ if(s1.value === s2.value){
   resultEl.innerText = "Aynı karakter seçilemez!";
   return;
 }
+
+// küçük bekleme efekti
+resultEl.innerText = "⚡ Çakralar çarpışıyor...";
+
+// kısa delay
+setTimeout(()=>{
 
 let score1 = c1.power + c1.speed + c1.iq + Math.random()*20;
 let score2 = c2.power + c2.speed + c2.iq + Math.random()*20;
@@ -147,6 +125,8 @@ setTimeout(()=>{
   document.body.classList.remove("shake");
 },800);
 
+},400);
+
 }
 
-      </script>
+</script>

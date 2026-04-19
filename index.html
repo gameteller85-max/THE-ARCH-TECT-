@@ -2,195 +2,138 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Architect Obsidian V10 - Pure Architecture</title>
+    <title>Architect Zenith V11</title>
     <style>
-        :root { --accent: #fff; --bg: #000; --font: 'JetBrains Mono', monospace; }
-        body { margin:0; height:100vh; background:var(--bg); color:#fff; font-family:var(--font); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+        :root { --accent: #ff3333; --p1: #111; --p2: #111; }
+        body { margin:0; height:100vh; background:#000; color:#fff; font-family:'JetBrains Mono', monospace; display:flex; align-items:center; justify-content:center; overflow:hidden; }
 
-        /* Optimized Layers */
-        #fx-layer { position:fixed; inset:0; z-index:1; pointer-events:none; }
-        .viewport { position:relative; width:92%; max-width:520px; background:rgba(5,5,5,0.98); border:1px solid #111; padding:40px; border-radius:45px; z-index:10; }
+        /* Arka Plan Efekt Katmanları */
+        #bg-canvas { position:fixed; inset:0; background: radial-gradient(circle at center, var(--p1) 0%, #000 70%); z-index:1; opacity:0.6; }
+        #fx-layer { position:fixed; inset:0; z-index:2; pointer-events:none; }
 
-        /* Component States */
-        .arena { display:grid; grid-template-columns: 1fr 40px 1fr; gap:20px; margin-bottom:40px; }
-        .slot { aspect-ratio:3/4; background:#030303; border:1px solid #111; border-radius:30px; overflow:hidden; position:relative; transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1); }
-        .slot img { width:100%; height:100%; object-fit:cover; opacity:0; transition: 1s; filter: grayscale(1); }
+        .viewport { position:relative; width:90%; max-width:480px; background:rgba(10,10,10,0.9); border:1px solid #222; padding:30px; border-radius:40px; z-index:10; backdrop-filter: blur(20px); }
         
-        /* State Reflectors */
-        .slot[data-state="ready"] img { opacity:0.4; filter: grayscale(0.6); }
-        .slot[data-state="winner"] { transform: translateY(-10px); border-color: var(--accent); box-shadow: 0 0 50px -10px var(--accent); }
-        .slot[data-state="winner"] img { opacity:1; filter: grayscale(0); }
+        /* Karakter Alanları */
+        .arena { display:flex; justify-content:space-between; gap:15px; margin-bottom:30px; }
+        .slot { flex:1; aspect-ratio:3/4; background:#050505; border:2px solid #111; border-radius:25px; overflow:hidden; position:relative; transition:0.5s; }
+        .slot img { width:100%; height:100%; object-fit:cover; opacity:0; transition:0.8s; }
+        .slot.loaded img { opacity:0.7; }
+        .slot.winner { border-color: var(--accent); box-shadow: 0 0 40px var(--accent); transform: scale(1.05); }
+        .slot.winner img { opacity:1; filter: contrast(1.2); }
 
-        /* UI Elements */
-        .controls { display:flex; flex-direction:column; gap:12px; }
-        .select-wrapper { position:relative; }
-        select, button { width:100%; background:#080808; color:#fff; border:1px solid #1a1a1a; padding:20px; border-radius:20px; font-family:inherit; font-weight:700; cursor:pointer; outline:none; transition:0.3s; }
-        button { background:var(--accent); color:#000; border:none; text-transform:uppercase; letter-spacing:4px; margin-top:20px; }
-        button:disabled { filter: grayscale(1); opacity:0.1; }
+        /* UI */
+        .controls { display:flex; flex-direction:column; gap:10px; }
+        select, button { background:#080808; color:#fff; border:1px solid #222; padding:15px; border-radius:15px; font-family:inherit; font-weight:bold; outline:none; }
+        button { background:var(--accent); color:#000; border:none; text-transform:uppercase; letter-spacing:3px; cursor:pointer; margin-top:10px; }
+        button:disabled { opacity:0.2; cursor:not-allowed; }
 
-        /* FX Components */
-        .rinnegan-ring { position:absolute; border:1px solid var(--fx-color); border-radius:50%; left:50%; top:50%; transform:translate(-50%,-50%); animation: obsidian-pulse 4s infinite linear; opacity:0; }
-        @keyframes obsidian-pulse { 0% {width:0; height:0; opacity:0.5;} 100% {width:1000px; height:1000px; opacity:0;} }
+        /* Rinnegan Efekti */
+        .rinne-ring { position:absolute; border:1px solid #9955ff; border-radius:50%; left:50%; top:50%; transform:translate(-50%,-50%); animation: ring-out 3s infinite; }
+        @keyframes ring-out { 0% {width:0; height:0; opacity:1;} 100% {width:800px; height:800px; opacity:0;} }
+        
+        .shake { animation: shake-anim 0.1s infinite; }
+        @keyframes shake-anim { 0%{transform:translate(2px)} 100%{transform:translate(-2px)} }
     </style>
 </head>
 <body>
 
+<div id="bg-canvas"></div>
 <div id="fx-layer"></div>
 
-<div class="viewport" id="nexus">
+<div class="viewport" id="app">
     <div class="arena">
-        <div class="slot" id="slot-0" data-idx="0"><img></div>
-        <div style="display:flex; align-items:center; justify-content:center; opacity:0.1; font-size:12px;">VS</div>
-        <div class="slot" id="slot-1" data-idx="1"><img></div>
+        <div class="slot" id="s0"><img id="i0"></div>
+        <div class="slot" id="s1"><img id="i1"></div>
     </div>
-
-    <div class="controls" id="ui-root">
-        <div class="select-wrapper"><select data-action="change-player" data-pidx="0"></select></div>
-        <div class="select-wrapper"><select data-action="change-player" data-pidx="1"></select></div>
-        <button data-action="initiate-battle" id="battle-btn">Run Engine</button>
+    <div class="controls">
+        <select id="sel0" onchange="Zenith.update(0, this.value)"></select>
+        <select id="sel1" onchange="Zenith.update(1, this.value)"></select>
+        <button id="run-btn" onclick="Zenith.battle()">INITIALIZE COMBAT</button>
     </div>
 </div>
 
 <script>
 /**
- * ARCHITECT OBSIDIAN V10
- * Concept: Immutable Architecture, Deterministic Probability, FX Registry
+ * ARCHITECT ZENITH V11
+ * Sorun Çözümü: Asset Güvenliği + Doğrudan Ses Tetikleme + Optimize Edilmiş FX
  */
 
-// 1. DATA & FX REGISTRY
-const REGISTRY = {
-    UNITS: {
-        itachi: { name: "ITACHI", pwr: 94, hex: "#ff2222", src: "https://i.ibb.co/L5rK5Q8/itachi.jpg", fx: [] },
-        pain: { name: "PAIN", pwr: 96, hex: "#9955ff", src: "https://i.ibb.co/mS7xZ8M/pain.jpg", fx: ['rinnegan'] },
-        sasuke: { name: "SASUKE", pwr: 91, hex: "#00ccff", src: "https://i.ibb.co/vYm6sF4/sasuke.jpg", fx: [] },
-        naruto: { name: "NARUTO", pwr: 88, hex: "#ffaa00", src: "https://i.ibb.co/K2Nf6X2/naruto.jpg", fx: [] }
-    },
-    EFFECTS: {
-        rinnegan: (color) => `<div class="rinnegan-ring" style="--fx-color:${color}"></div>`
-    },
-    ASSET_CACHE: new Map()
-};
-
-// 2. IMMUTABLE ENGINE
-const Engine = (() => {
-    let _state = Object.freeze({
-        players: ['itachi', 'pain'],
-        isBusy: false,
-        winner: null,
-        lastAction: null
-    });
-
-    const _subscribers = [];
-
-    const _reducer = (state, action) => {
-        switch(action.type) {
-            case 'SET_PLAYER':
-                const newPlayers = [...state.players];
-                newPlayers[action.idx] = action.key;
-                return { ...state, players: newPlayers, winner: null, lastAction: 'PLAYER_CHANGE' };
-            case 'START_BATTLE':
-                return { ...state, isBusy: true, winner: null, lastAction: 'BATTLE_START' };
-            case 'RESOLVE_BATTLE':
-                return { ...state, isBusy: false, winner: action.winner, lastAction: 'BATTLE_END' };
-            default: return state;
-        }
-    };
-
-    return {
-        dispatch: (action) => {
-            _state = Object.freeze(_reducer(_state, action));
-            _subscribers.forEach(fn => fn(_state));
-        },
-        subscribe: (fn) => _subscribers.push(fn),
-        getState: () => _state
-    };
-})();
-
-// 3. UI CONTROLLER (Virtual-ish DOM)
-const UI = {
-    init: () => {
-        const selects = document.querySelectorAll('select');
-        Object.keys(REGISTRY.UNITS).forEach(k => {
-            selects.forEach(s => s.innerHTML += `<option value="${k}">${REGISTRY.UNITS[k].name}</option>`);
-        });
-        selects[0].value = Engine.getState().players[0];
-        selects[1].value = Engine.getState().players[1];
-
-        // Centralized Event Delegation
-        document.addEventListener('change', (e) => {
-            if(e.target.dataset.action === 'change-player') {
-                Engine.dispatch({ type: 'SET_PLAYER', idx: parseInt(e.target.dataset.pidx), key: e.target.value });
-            }
-        });
-
-        document.addEventListener('click', (e) => {
-            if(e.target.dataset.action === 'initiate-battle') UI.handleBattle();
-        });
-
-        Engine.subscribe(UI.render);
-        UI.render(Engine.getState());
-    },
-
-    handleBattle: () => {
-        Engine.dispatch({ type: 'START_BATTLE' });
-        setTimeout(() => {
-            const state = Engine.getState();
-            const u1 = REGISTRY.UNITS[state.players[0]];
-            const u2 = REGISTRY.UNITS[state.players[1]];
-            
-            // Deterministic Weighted Probability
-            const total = u1.pwr + u2.pwr;
-            const threshold = (u1.pwr / total) * 100;
-            const winner = (Math.random() * 100) < threshold ? 0 : 1;
-            
-            Engine.dispatch({ type: 'RESOLVE_BATTLE', winner });
-        }, 1500);
-    },
-
-    render: (state) => {
-        const fxLayer = document.getElementById('fx-layer');
-        const btn = document.getElementById('battle-btn');
-
-        btn.disabled = state.isBusy;
-        
-        state.players.forEach((key, i) => {
-            const unit = REGISTRY.UNITS[key];
-            const slot = document.getElementById(`slot-${i}`);
-            const img = slot.querySelector('img');
-
-            // Asset Cache Control
-            if (!REGISTRY.ASSET_CACHE.has(unit.src)) {
-                const loader = new Image();
-                loader.src = unit.src;
-                loader.onload = () => {
-                    REGISTRY.ASSET_CACHE.set(unit.src, true);
-                    img.src = unit.src;
-                    slot.setAttribute('data-state', 'ready');
-                };
-            } else {
-                img.src = unit.src;
-                slot.setAttribute('data-state', state.winner === i ? 'winner' : 'ready');
-            }
-
-            // Centralized FX Rendering (Only if Action is PLAYER_CHANGE or BATTLE_END)
-            if (state.lastAction === 'PLAYER_CHANGE' || i === 0) {
-                fxLayer.innerHTML = '';
-                state.players.forEach(pKey => {
-                    const pUnit = REGISTRY.UNITS[pKey];
-                    pUnit.fx.forEach(fxKey => {
-                        if (REGISTRY.EFFECTS[fxKey]) fxLayer.innerHTML += REGISTRY.EFFECTS[fxKey](pUnit.hex);
-                    });
-                });
-            }
-        });
-
-        if (state.winner !== null) {
-            document.documentElement.style.setProperty('--accent', REGISTRY.UNITS[state.players[state.winner]].hex);
-        }
+const DATA = {
+    units: {
+        itachi: { name: "ITACHI", pwr: 94, color: "#ff3333", img: "https://i.ibb.co/L5rK5Q8/itachi.jpg", sfx: "https://www.myinstants.com/media/sounds/itachi-shisui-susanoo.mp3" },
+        pain: { name: "PAIN", pwr: 98, color: "#9955ff", img: "https://i.ibb.co/mS7xZ8M/pain.jpg", sfx: "https://www.myinstants.com/media/sounds/shinra-tensei.mp3", hasFX: true },
+        sasuke: { name: "SASUKE", pwr: 92, color: "#00eeff", img: "https://i.ibb.co/vYm6sF4/sasuke.jpg", sfx: "https://www.myinstants.com/media/sounds/chidori-sound-effect.mp3" },
+        naruto: { name: "NARUTO", pwr: 90, color: "#ffaa00", img: "https://i.ibb.co/K2Nf6X2/naruto.jpg", sfx: "https://www.myinstants.com/media/sounds/naruto-uzumaki-dattebayo.mp3" }
     }
 };
 
-UI.init();
+const Zenith = (() => {
+    let state = { p: ['itachi', 'pain'], busy: false };
+    const audio = new Audio();
+
+    const render = () => {
+        state.p.forEach((id, i) => {
+            const u = DATA.units[id];
+            const slot = document.getElementById(`s${i}`);
+            const img = document.getElementById(`i${i}`);
+            
+            img.src = u.img;
+            img.onload = () => slot.classList.add('loaded');
+            img.onerror = () => { img.src = "https://via.placeholder.com/300x400?text=ASSET_ERR"; };
+            
+            if (i === 0) document.body.style.setProperty('--p1', u.color);
+            if (u.hasFX) {
+                document.getElementById('fx-layer').innerHTML = '<div class="rinne-ring"></div><div class="rinne-ring" style="animation-delay:1s"></div>';
+            } else if (!state.p.some(px => DATA.units[px].hasFX)) {
+                document.getElementById('fx-layer').innerHTML = '';
+            }
+        });
+    };
+
+    return {
+        init: () => {
+            const s0 = document.getElementById('sel0');
+            const s1 = document.getElementById('sel1');
+            Object.keys(DATA.units).forEach(k => {
+                const opt = `<option value="${k}">${DATA.units[k].name}</option>`;
+                s0.innerHTML += opt; s1.innerHTML += opt;
+            });
+            s0.value = state.p[0]; s1.value = state.p[1];
+            render();
+        },
+        update: (i, val) => {
+            state.p[i] = val;
+            document.querySelectorAll('.slot').forEach(s => s.classList.remove('winner', 'loaded'));
+            render();
+        },
+        battle: () => {
+            if (state.busy) return;
+            state.busy = true;
+            document.getElementById('run-btn').disabled = true;
+            document.getElementById('app').classList.add('shake');
+
+            setTimeout(() => {
+                const u0 = DATA.units[state.p[0]];
+                const u1 = DATA.units[state.p[1]];
+                const winIdx = (u0.pwr * Math.random()) > (u1.pwr * Math.random()) ? 0 : 1;
+                const winner = DATA.units[state.p[winIdx]];
+
+                document.getElementById(`s${winIdx}`).classList.add('winner');
+                document.body.style.setProperty('--accent', winner.color);
+                
+                // Ses Motoru - Doğrudan Erişim
+                audio.src = winner.sfx;
+                audio.play().catch(e => console.log("Ses hatası"));
+
+                state.busy = false;
+                document.getElementById('run-btn').disabled = false;
+                document.getElementById('app').classList.remove('shake');
+            }, 1000);
+        }
+    };
+})();
+
+window.onload = Zenith.init;
 </script>
 </body>
 </html>

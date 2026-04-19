@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Efsanevi Karşılaşma v2.2 - Rinnegan Edition</title>
+    <title>Efsanevi Karşılaşma v2.3 - Shinra Tensei</title>
 </head>
 <body>
 
@@ -32,57 +32,51 @@
     
     body {
         background-color: #0d0d0d;
-        font-family: 'Segoe UI', Roboto, sans-serif;
+        font-family: sans-serif;
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
         margin: 0;
-        overflow: hidden; /* Taşmaları engeller */
-        transition: background 0.8s ease;
+        overflow: hidden;
+        transition: background 0.5s;
     }
 
-    /* RİNNEGAN EFEKTİ (CSS ile oluşturulan halkalar) */
+    /* RİNNEGAN EFEKTİ - BU SEFER DAHA NET VE GÖRÜNÜR */
     #rinnegan-bg {
         position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 250vw;
-        height: 250vh;
-        /* Pain'in göz yapısını andıran iç içe mor halkalar */
-        background: radial-gradient(circle, 
-            transparent 5%, 
-            #2e1a47 6%, transparent 7%, 
-            #2e1a47 15%, transparent 16%, 
-            #2e1a47 25%, transparent 26%, 
-            #2e1a47 35%, transparent 36%,
-            #2e1a47 45%, transparent 46%);
-        opacity: 0;
+        width: 300vw;
+        height: 300vh;
+        /* Daha koyu ve keskin mor halkalar */
+        background: repeating-radial-gradient(
+            circle,
+            #1a0d26 0%,
+            #1a0d26 10%,
+            #4b3d61 11%,
+            #4b3d61 12%,
+            #1a0d26 13%
+        );
+        opacity: 0; /* Başlangıçta gizli */
         z-index: -1;
-        transition: opacity 1s ease;
-        pointer-events: none;
+        transition: opacity 0.5s ease-in-out;
     }
 
     .vs-box {
-        background: rgba(26, 26, 26, 0.9);
+        background: #1a1a1a;
         padding: 30px;
         border-radius: 20px;
         text-align: center;
         width: 90%;
         max-width: 450px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.8);
-        border: 2px solid #444;
+        box-shadow: 0 0 30px rgba(0,0,0,1);
+        border: 2px solid #333;
         z-index: 10;
-        backdrop-filter: blur(5px); /* Arkayı hafif bulanık yapar */
     }
 
-    h2 {
-        color: #fff;
-        font-size: 24px;
-        margin-bottom: 25px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    }
+    h2 { color: #fff; margin-bottom: 25px; }
 
     .selection-area {
         display: flex;
@@ -93,69 +87,49 @@
 
     select {
         padding: 12px;
-        background: #2a2a2a;
+        background: #333;
         color: white;
         border: 1px solid #555;
         border-radius: 8px;
-        outline: none;
-        cursor: pointer;
         width: 42%;
     }
 
     button {
-        background: linear-gradient(45deg, #ff4444, #cc0000);
+        background: #ff4444;
         color: white;
-        padding: 15px 30px;
+        padding: 15px;
         border: none;
         border-radius: 50px;
         font-weight: bold;
-        font-size: 16px;
-        cursor: pointer;
         width: 100%;
-        transition: 0.3s;
-        box-shadow: 0 5px 15px rgba(255, 68, 68, 0.4);
-    }
-
-    button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(255, 68, 68, 0.6);
+        cursor: pointer;
     }
 
     #result {
         margin-top: 30px;
-        color: #aaa;
-        font-size: 18px;
-        min-height: 24px;
+        color: #eee;
+        font-size: 20px;
+        font-weight: bold;
     }
 
-    /* KAZANAN EFEKTİ */
+    /* KAZANAN PARLAMASI */
     .win-text {
         color: #ffcc00 !important;
-        font-size: 22px !important;
-        text-shadow: 0 0 15px #ffcc00;
-        font-weight: bold;
-        animation: pulse 1s infinite;
+        text-shadow: 0 0 20px #ffcc00;
     }
 
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-    }
-
+    /* SARSILMA EFEKTİ */
     .shake {
-        animation: shakeAnim 0.4s ease-in-out;
+        animation: shake 0.4s;
     }
-
-    @keyframes shakeAnim {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-8px); }
-        50% { transform: translateX(8px); }
-        75% { transform: translateX(-8px); }
+    @keyframes shake {
+        0% { transform: translate(1px, 1px); }
+        50% { transform: translate(-3px, 2px); }
+        100% { transform: translate(0, 0); }
     }
 </style>
 
 <script>
-    // Karakterler ve Güçler
     const characters = [
         { name: "Naruto", power: 92, speed: 88, iq: 75 },
         { name: "Itachi", power: 85, speed: 92, iq: 98 },
@@ -166,20 +140,16 @@
     const s1 = document.getElementById("char1");
     const s2 = document.getElementById("char2");
     const resultEl = document.getElementById("result");
+    const rinnegan = document.getElementById("rinnegan-bg");
     const box = document.querySelector(".vs-box");
-    const winSound = document.getElementById("winSound");
-    const rinneganBg = document.getElementById("rinnegan-bg");
 
-    // Başlatma: Listeleri doldur
     function init() {
-        s1.innerHTML = "";
-        s2.innerHTML = "";
         characters.forEach((char, index) => {
             s1.add(new Option(char.name, index));
             s2.add(new Option(char.name, index));
         });
-        s1.selectedIndex = 3; // Sol tarafta Pain başlasın
-        s2.selectedIndex = 1; // Sağ tarafta Itachi başlasın
+        s1.selectedIndex = 3; // Pain
+        s2.selectedIndex = 1; // Itachi
     }
 
     function fight() {
@@ -187,49 +157,40 @@
         const val2 = parseInt(s2.value);
 
         if (val1 === val2) {
-            resultEl.innerText = "❌ Aynı karakterler savaşamaz!";
-            resultEl.style.color = "#ff4444";
+            resultEl.innerText = "❌ Aynı karakter olmaz!";
             return;
         }
 
-        const btn = document.getElementById("fightBtn");
-        btn.disabled = true;
-
-        // Her savaştan önce efektleri sıfırla
-        resultEl.classList.remove("win-text");
-        rinneganBg.style.opacity = "0";
+        // Efektleri Temizle
+        rinnegan.style.opacity = "0";
         document.body.style.background = "#0d0d0d";
+        resultEl.classList.remove("win-text");
         
-        resultEl.style.color = "#eee";
-        resultEl.innerText = "⚡ Çakralar çarpışıyor...";
+        resultEl.innerText = "⚡ Savaş başlıyor...";
 
         setTimeout(() => {
             const c1 = characters[val1];
             const c2 = characters[val2];
 
-            // Güç Hesaplama
-            let p1 = (c1.power * 0.5) + (c1.speed * 0.3) + (c1.iq * 0.2) + (Math.random() * 12);
-            let p2 = (c2.power * 0.5) + (c2.speed * 0.3) + (c2.iq * 0.2) + (Math.random() * 12);
+            let score1 = (c1.power * 0.5) + (c1.speed * 0.3) + (c1.iq * 0.2) + (Math.random() * 20);
+            let score2 = (c2.power * 0.5) + (c2.speed * 0.3) + (c2.iq * 0.2) + (Math.random() * 20);
 
-            let winner = p1 > p2 ? c1.name : c2.name;
+            let winner = score1 > score2 ? c1.name : c2.name;
 
             resultEl.innerText = "🔥 Kazanan: " + winner;
             resultEl.classList.add("win-text");
             box.classList.add("shake");
 
-            // ÖZEL: Pain Kazanırsa Rinnegan'ı Aktif Et
+            // EĞER PAİN KAZANIRSA RİNNEGAN'I PATLAT
             if (winner === "Pain") {
-                rinneganBg.style.opacity = "0.5";
-                document.body.style.background = "#1a0d26";
+                rinnegan.style.opacity = "1"; // GÖRÜNÜR YAP
+                document.body.style.background = "#1a0d26"; // ARKA PLANI DEĞİŞTİR
             }
 
-            // Ses
-            winSound.currentTime = 0;
-            winSound.play().catch(() => {});
+            document.getElementById("winSound").play().catch(() => {});
 
             setTimeout(() => {
                 box.classList.remove("shake");
-                btn.disabled = false;
             }, 500);
 
         }, 800);

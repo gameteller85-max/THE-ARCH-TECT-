@@ -1,121 +1,189 @@
-<!DOCTYPE html><html lang="tr">
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Architect - Final Restore (Fixed)</title>
-<style>
-body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#050505;
-    color:white;
-    font-family:sans-serif;
-    overflow:hidden;
-    transition:0.5s;
-}/* ===== RINNEGAN UPGRADE ===== */ .rinnegan-container{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:-1; opacity:0.35; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Architect - Final Arena</title>
+    <style>
+        :root {
+            --pain-color: #b38cff;
+            --naruto-color: #ffcc00;
+            --itachi-color: #ff4444;
+            --sasuke-color: #00d9ff;
+            --bg-dark: #050505;
+        }
 
-.ring{ position:absolute; border:2px solid #b38cff; border-radius:50%; box-shadow:0 0 20px #b38cff, inset 0 0 20px #b38cff; }
+        body {
+            margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: var(--bg-dark); color: white; font-family: 'Segoe UI', Tahoma, sans-serif;
+            overflow: hidden; transition: 0.8s ease;
+        }
 
-.r1{width:120px;height:120px;animation:spin 6s linear infinite;} .r2{width:260px;height:260px;animation:spinReverse 10s linear infinite;} .r3{width:420px;height:420px;animation:spin 14s linear infinite;} .r4{width:600px;height:600px;animation:spinReverse 18s linear infinite;}
+        /* Başlatma Perdesi (Mobil Ses Kilidini Açar) */
+        #gate {
+            position: fixed; inset: 0; background: black; z-index: 1000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.5s;
+        }
+        #gate h2 { border: 1px solid white; padding: 15px 30px; letter-spacing: 4px; animation: pulse 1.5s infinite; }
 
-@keyframes spin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} } @keyframes spinReverse{ from{transform:rotate(360deg);} to{transform:rotate(0deg);} }
+        /* Arka Plan Efektleri */
+        .rinnegan-bg {
+            position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+            z-index: -1; opacity: 0.2; pointer-events: none;
+        }
+        .ring { position: absolute; border: 2px solid var(--pain-color); border-radius: 50%; box-shadow: 0 0 40px var(--pain-color); }
+        .r1 { width: 100px; height: 100px; animation: spin 8s linear infinite; }
+        .r2 { width: 600px; height: 600px; animation: spinReverse 20s linear infinite; }
 
-/* ===== UI ===== */ .vs-box{ background:rgba(15,15,15,0.95); padding:30px; border-radius:20px; text-align:center; border:1px solid #333; width:85%; max-width:380px; backdrop-filter:blur(10px); box-shadow:0 10px 30px rgba(0,0,0,0.8); }
+        /* Ana Kutu */
+        .vs-box {
+            background: rgba(15, 15, 15, 0.9); padding: 25px; border-radius: 20px;
+            width: 90%; max-width: 420px; border: 1px solid #333;
+            backdrop-filter: blur(15px); box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            text-align: center; z-index: 10;
+        }
 
-select{ width:100%; padding:12px; margin:10px 0; border-radius:8px; background:#222; color:white; border:1px solid #444; font-weight:bold; }
+        .arena { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .card { border-radius: 12px; overflow: hidden; border: 2px solid #222; aspect-ratio: 3/4; background: #111; transition: 0.4s; }
+        .card img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(60%); transition: 0.5s; }
+        .active-winner { border-color: gold !important; transform: scale(1.05); box-shadow: 0 0 30px gold; }
+        .active-winner img { filter: grayscale(0%) contrast(1.1); }
 
-button{ width:100%; padding:15px; margin-top:15px; border-radius:8px; background:#ff4444; color:white; border:none; font-weight:bold; cursor:pointer; font-size:16px; } button:active{transform:scale(0.95);}
+        select { width: 100%; padding: 12px; background: #1a1a1a; color: white; border: 1px solid #444; border-radius: 8px; margin-bottom: 10px; }
+        button {
+            width: 100%; padding: 16px; border-radius: 8px; background: #d00; color: white;
+            border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+        }
+        button:active { transform: scale(0.98); }
 
-#result{margin-top:20px;font-size:20px;font-weight:bold;color:#ffcc00;} </style>
+        #result-text { margin-top: 15px; font-size: 20px; font-weight: bold; min-height: 28px; }
 
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes spinReverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+        .shake { animation: shake 0.1s infinite; }
+        @keyframes shake { 0%{transform: translate(2px,2px)} 50%{transform: translate(-2px,-2px)} 100%{transform: translate(0)} }
+    </style>
 </head>
-<body><div class="rinnegan-container" id="rinnegan">
-    <div class="ring r1"></div>
-    <div class="ring r2"></div>
-    <div class="ring r3"></div>
-    <div class="ring r4"></div>
-</div><div class="vs-box">
-    <h2>⚔️ Efsanevi Karşılaşma</h2><select id="char1" onchange="checkVisuals()">
-    <option value="0">Naruto</option>
-    <option value="1">Itachi</option>
-    <option value="2">Sasuke</option>
-    <option value="3" selected>Pain</option>
-</select>
+<body>
 
-<div>VS</div>
+<div id="gate" onclick="unlockSystem()">
+    <h2>SİSTEMİ BAŞLAT</h2>
+    <p>Ses ve Görseller Yükleniyor...</p>
+</div>
 
-<select id="char2" onchange="checkVisuals()">
-    <option value="0" selected>Naruto</option>
-    <option value="1">Itachi</option>
-    <option value="2">Sasuke</option>
-    <option value="3">Pain</option>
-</select>
+<div class="rinnegan-bg" id="rinnegan">
+    <div class="ring r1"></div><div class="ring r2"></div>
+</div>
 
-<button onclick="initiateFight()">SAVAŞI BAŞLAT</button>
+<div class="vs-box" id="arenaBox">
+    <h3 style="margin-top:0; letter-spacing:2px; color:#888;">THE ARCHITECT ARENA</h3>
+    <div class="arena">
+        <div class="card" id="card1"><img id="img1" src=""></div>
+        <div style="font-weight:900; font-size:24px; color:#444;">VS</div>
+        <div class="card" id="card2"><img id="img2" src=""></div>
+    </div>
 
-<div id="result">Karakterini seç!</div>
+    <div style="display:flex; gap:10px;">
+        <select id="p1" onchange="render()"></select>
+        <select id="p2" onchange="render()"></select>
+    </div>
 
-</div><audio id="s-0" src="https://www.myinstants.com/media/sounds/naruto-uzumaki-dattebayo.mp3"></audio> <audio id="s-1" src="https://www.myinstants.com/media/sounds/itachi-shisui-susanoo.mp3"></audio> <audio id="s-2" src="https://www.myinstants.com/media/sounds/chidori-sound-effect.mp3"></audio> <audio id="s-3" src="https://www.myinstants.com/media/sounds/shinra-tensei.mp3"></audio>
+    <button onclick="startFight()">Savaşı Başlat</button>
+    <div id="result-text">Rakipleri Belirle</div>
+</div>
 
 <script>
-let audioUnlocked=false;
+    // Karakter Veritabanı (Görseller senin attıklarınla eşleşecek şekilde ayarlandı)
+    const db = {
+        "itachi": { name: "Itachi Uchiha", power: 92, color: "#ff4444", img: "https://i.ibb.co/VvzS0vC/itachi.jpg", sound: "https://www.myinstants.com/media/sounds/itachi-shisui-susanoo.mp3" },
+        "pain": { name: "Pain Nagato", power: 95, color: "#b38cff", img: "https://i.ibb.co/XW3sK3s/pain.jpg", sound: "https://www.myinstants.com/media/sounds/shinra-tensei.mp3" },
+        "naruto": { name: "Naruto Uzumaki", power: 88, color: "#ffcc00", img: "https://i.ibb.co/fN8L0vL/naruto.jpg", sound: "https://www.myinstants.com/media/sounds/naruto-uzumaki-dattebayo.mp3" },
+        "sasuke": { name: "Sasuke Uchiha", power: 89, color: "#00d9ff", img: "https://i.ibb.co/5G7G7zS/sasuke.jpg", sound: "https://www.myinstants.com/media/sounds/chidori-sound-effect.mp3" }
+    };
 
-function checkVisuals(){
-    const c1=document.getElementById("char1").value;
-    const c2=document.getElementById("char2").value;
-    const r=document.getElementById("rinnegan");
+    const sel1 = document.getElementById("p1");
+    const sel2 = document.getElementById("p2");
+    let audios = {};
 
-    if(c1==="3"||c2==="3"){
-        r.style.display="flex";
-        document.body.style.background="#120a1a";
-    }else{
-        r.style.display="none";
-        document.body.style.background="#050505";
-    }
-}
-
-function unlockAudio(){
-    for(let i=0;i<4;i++){
-        let a=document.getElementById("s-"+i);
-        a.play().then(()=>{a.pause();a.currentTime=0;}).catch(()=>{});
-    }
-    audioUnlocked=true;
-}
-
-function initiateFight(){
-    if(!audioUnlocked) unlockAudio();
-    fight();
-}
-
-function fight(){
-    const c1=document.getElementById("char1").value;
-    const c2=document.getElementById("char2").value;
-    const res=document.getElementById("result");
-
-    const names=["Naruto 🍥","Itachi 👁️","Sasuke ⚡","Pain 🌀"];
-
-    if(c1===c2){
-        res.innerText="Aynı karakterler kapışamaz!";
-        res.style.color="#ff4444";
-        return;
+    // Başlatma ve Ses Kilidi Açma
+    function unlockSystem() {
+        document.getElementById("gate").style.opacity = "0";
+        setTimeout(() => document.getElementById("gate").remove(), 500);
+        
+        // Sesleri önceden yükle (Mobil uyum için şart)
+        Object.keys(db).forEach(key => {
+            audios[key] = new Audio(db[key].sound);
+            audios[key].load();
+        });
     }
 
-    res.innerText="⚡ Çakralar çarpışıyor...";
-    res.style.color="#ffcc00";
+    // Select Menülerini Doldur
+    Object.keys(db).forEach(key => {
+        sel1.innerHTML += `<option value="${key}">${db[key].name}</option>`;
+        sel2.innerHTML += `<option value="${key}">${db[key].name}</option>`;
+    });
+    sel1.value = "pain"; sel2.value = "itachi";
 
-    setTimeout(()=>{
-        const winner=Math.random()>0.5?c1:c2;
-        res.innerText="🔥 KAZANAN: "+names[winner];
-        res.style.color="#00ffb3";
+    function render() {
+        const char1 = db[sel1.value];
+        const char2 = db[sel2.value];
+        
+        document.getElementById("img1").src = char1.img;
+        document.getElementById("img2").src = char2.img;
 
-        let audio=document.getElementById("s-"+winner);
-        if(audio) audio.play();
-    },900);
-}
+        // Rinnegan & Atmosfer Kontrolü
+        const r = document.getElementById("rinnegan");
+        if(sel1.value === "pain" || sel2.value === "pain") {
+            r.style.display = "flex";
+            document.body.style.background = "#0f0816";
+        } else {
+            r.style.display = "none";
+            document.body.style.background = "#050505";
+        }
+    }
 
-checkVisuals();
-</script></body>
+    function startFight() {
+        const id1 = sel1.value; const id2 = sel2.value;
+        const res = document.getElementById("result-text");
+        const box = document.getElementById("arenaBox");
+
+        if(id1 === id2) {
+            res.innerText = "Aynı kişiler savaşamaz!";
+            res.style.color = "red";
+            return;
+        }
+
+        res.innerText = "Çakralar çarpışıyor...";
+        res.style.color = "white";
+        box.classList.add("shake");
+
+        setTimeout(() => {
+            box.classList.remove("shake");
+            
+            // Gelişmiş Denge Algoritması
+            const roll1 = db[id1].power + (Math.random() * 20);
+            const roll2 = db[id2].power + (Math.random() * 20);
+            const winnerId = roll1 > roll2 ? id1 : id2;
+
+            res.innerText = "🏆 KAZANAN: " + db[winnerId].name;
+            res.style.color = db[winnerId].color;
+
+            // Görseli Parlat
+            const winCard = winnerId === id1 ? "card1" : "card2";
+            document.getElementById(winCard).classList.add("active-winner");
+            setTimeout(() => document.getElementById(winCard).classList.remove("active-winner"), 2500);
+
+            // Ses Oynat
+            if(audios[winnerId]) {
+                audios[winnerId].currentTime = 0;
+                audios[winnerId].play();
+            }
+        }, 1200);
+    }
+
+    render();
+</script>
+</body>
 </html>

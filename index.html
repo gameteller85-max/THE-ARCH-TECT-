@@ -1,108 +1,137 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<title>ARCHITECT V11 FIX</title>
+    <meta charset="UTF-8">
+    <title>Architect Singularity V12</title>
+    <style>
+        :root { --accent: #fff; --p0: #111; --p1: #111; }
+        body { margin:0; height:100vh; background:#000; color:#fff; font-family:'JetBrains Mono', monospace; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+        
+        #fx-layer { position:fixed; inset:0; z-index:5; pointer-events:none; }
+        .viewport { position:relative; width:92%; max-width:500px; background:rgba(5,5,5,0.95); border:1px solid #1a1a1a; padding:35px; border-radius:45px; z-index:10; backdrop-filter:blur(50px); box-shadow: 0 0 100px rgba(0,0,0,1); }
+        
+        /* Arena & Slots */
+        .arena { display:flex; gap:15px; margin-bottom:30px; perspective: 1000px; }
+        .slot { flex:1; aspect-ratio:3/4; background:#030303; border:2px solid #111; border-radius:30px; overflow:hidden; position:relative; transition: 0.6s cubic-bezier(0.2, 1, 0.3, 1); }
+        .slot img { width:100%; height:100%; object-fit:cover; opacity:0; transition:0.5s; filter: grayscale(1); }
+        .slot.active img { opacity:0.5; }
+        .slot.winner { border-color: var(--accent); box-shadow: 0 0 50px var(--accent); transform: translateZ(20px) translateY(-10px); }
+        .slot.winner img { opacity:1; filter: grayscale(0) contrast(1.1); }
 
-<style>
-body{
-margin:0;height:100vh;background:#000;color:#fff;
-display:flex;align-items:center;justify-content:center;
-font-family:monospace;
-}
+        /* UI Kit */
+        .controls { display:flex; flex-direction:column; gap:12px; }
+        select, button { background:#080808; color:#fff; border:1px solid #222; padding:18px; border-radius:20px; font-family:inherit; font-weight:700; outline:none; }
+        button { background:var(--accent); color:#000; border:none; text-transform:uppercase; letter-spacing:4px; cursor:pointer; transition: 0.3s; }
+        button:active { transform: scale(0.95); }
 
-.viewport{width:420px;background:#0a0a0a;padding:30px;border-radius:20px}
-
-.arena{display:flex;justify-content:space-between;margin-bottom:20px}
-
-.card{width:160px;height:220px;background:#111;border-radius:15px;overflow:hidden}
-.card img{width:100%;height:100%;object-fit:cover;opacity:0;transition:.5s}
-.card.active img{opacity:1}
-.card.winner{border:2px solid gold}
-
-button,select{
-width:100%;padding:12px;margin-top:10px;
-background:#111;color:#fff;border:1px solid #333;border-radius:10px
-}
-button{cursor:pointer;background:#fff;color:#000;font-weight:bold}
-</style>
+        /* FX Animations */
+        .rinne-ring { position:absolute; border:2px solid #9955ff; border-radius:50%; left:50%; top:50%; transform:translate(-50%,-50%); animation: rinne 4s infinite linear; }
+        @keyframes rinne { 0% {width:0; height:0; opacity:1;} 100% {width:1200px; height:1200px; opacity:0;} }
+        
+        .shake { animation: s-shake 0.1s infinite; }
+        @keyframes s-shake { 0%{transform:translateX(3px)} 100%{transform:translateX(-3px)} }
+        
+        #announcer { text-align:center; margin-top:20px; font-size:12px; letter-spacing:3px; color: var(--accent); text-transform:uppercase; min-height:15px; }
+    </style>
 </head>
-
 <body>
 
-<div class="viewport">
-  <div class="arena">
-    <div class="card" id="c1"><img id="i1"></div>
-    <div class="card" id="c2"><img id="i2"></div>
-  </div>
+<div id="fx-layer"></div>
 
-  <select id="s1"></select>
-  <select id="s2"></select>
-  <button onclick="fight()">FIGHT</button>
-
-  <div id="msg" style="margin-top:10px;font-size:12px"></div>
+<div class="viewport" id="nexus">
+    <div class="arena">
+        <div class="slot" id="s0"><img id="i0"></div>
+        <div class="slot" id="s1"><img id="i1"></div>
+    </div>
+    <div class="controls">
+        <select id="sel0" onchange="App.sync(0, this.value)"></select>
+        <select id="sel1" onchange="App.sync(1, this.value)"></select>
+        <button id="cta" onclick="App.battle()">Initiate Combat</button>
+    </div>
+    <div id="announcer"></div>
 </div>
 
 <script>
-const db = {
-itachi:{n:"Itachi",p:94,i:"https://i.ibb.co/L5rK5Q8/itachi.jpg",s:"https://www.myinstants.com/media/sounds/itachi-shisui-susanoo.mp3"},
-pain:{n:"Pain",p:96,i:"https://i.ibb.co/mS7xZ8M/pain.jpg",s:"https://www.myinstants.com/media/sounds/shinra-tensei.mp3"},
-sasuke:{n:"Sasuke",p:91,i:"https://i.ibb.co/vYm6sF4/sasuke.jpg",s:"https://www.myinstants.com/media/sounds/chidori-sound-effect.mp3"},
-naruto:{n:"Naruto",p:88,i:"https://i.ibb.co/K2Nf6X2/naruto.jpg",s:"https://www.myinstants.com/media/sounds/naruto-uzumaki-dattebayo.mp3"},
+/**
+ * ARCHITECT SINGULARITY V12
+ * Madara & Minato Integrated | Audio Sync Fixed | FX Logic Rebuilt
+ */
 
-madara:{n:"Madara Uchiha",p:98,i:"https://i.ibb.co/7Y9Q7kZ/madara.jpg",s:"https://www.myinstants.com/media/sounds/susanoo.mp3"},
-minato:{n:"Minato Namikaze",p:97,i:"https://i.ibb.co/3vK5Z9R/minato.jpg",s:"https://www.myinstants.com/media/sounds/hiraishin.mp3"}
+const REGISTRY = {
+    units: {
+        itachi: { name: "ITACHI", pwr: 94, hex: "#ff3333", img: "https://i.ibb.co/L5rK5Q8/itachi.jpg", sfx: "https://www.myinstants.com/media/sounds/itachi-shisui-susanoo.mp3" },
+        pain: { name: "PAIN", pwr: 98, hex: "#aa66ff", img: "https://i.ibb.co/mS7xZ8M/pain.jpg", sfx: "https://www.myinstants.com/media/sounds/shinra-tensei.mp3", fx: 'rinnegan' },
+        sasuke: { name: "SASUKE", pwr: 92, hex: "#00eeff", img: "https://i.ibb.co/vYm6sF4/sasuke.jpg", sfx: "https://www.myinstants.com/media/sounds/chidori-sound-effect.mp3" },
+        naruto: { name: "NARUTO", pwr: 90, hex: "#ffcc00", img: "https://i.ibb.co/K2Nf6X2/naruto.jpg", sfx: "https://www.myinstants.com/media/sounds/naruto-uzumaki-dattebayo.mp3" },
+        madara: { name: "MADARA", pwr: 99, hex: "#880000", img: "https://i.ibb.co/x7G6J3m/madara.jpg", sfx: "https://www.myinstants.com/media/sounds/madara-uchiha-susanoo.mp3", fx: 'sharingan' },
+        minato: { name: "MINATO", pwr: 95, hex: "#ffffcc", img: "https://i.ibb.co/6P0N2zV/minato.jpg", sfx: "https://www.myinstants.com/media/sounds/hiraishin.mp3" }
+    }
 };
 
-let a1=new Audio(),a2=new Audio();
+const App = (() => {
+    let state = { p: ['itachi', 'pain'], busy: false };
+    const mixer = new Audio();
 
-function init(){
-for(let k in db){
-s1.innerHTML+=`<option value="${k}">${db[k].n}</option>`
-s2.innerHTML+=`<option value="${k}">${db[k].n}</option>`
-}
-s1.value="itachi"
-s2.value="pain"
-sync()
-}
+    const updateUI = () => {
+        const fx = document.getElementById('fx-layer');
+        fx.innerHTML = '';
+        
+        state.p.forEach((id, i) => {
+            const u = REGISTRY.units[id];
+            const slot = document.getElementById(`s${i}`);
+            const img = document.getElementById(`i${i}`);
+            
+            slot.classList.remove('winner');
+            img.src = u.img;
+            img.onload = () => slot.classList.add('active');
 
-function sync(){
-let p1=db[s1.value]
-let p2=db[s2.value]
+            if(u.fx === 'rinnegan') {
+                fx.innerHTML += `<div class="rinne-ring"></div><div class="rinne-ring" style="animation-delay:1s"></div>`;
+            }
+        });
+        document.getElementById('announcer').innerText = 'System_Ready';
+    };
 
-i1.src=p1.i
-i2.src=p2.i
+    return {
+        init: () => {
+            const sels = [document.getElementById('sel0'), document.getElementById('sel1')];
+            Object.keys(REGISTRY.units).forEach(k => {
+                sels.forEach(s => s.innerHTML += `<option value="${k}">${REGISTRY.units[k].name}</option>`);
+            });
+            sels[0].value = state.p[0]; sels[1].value = state.p[1];
+            updateUI();
+        },
+        sync: (i, v) => { state.p[i] = v; updateUI(); },
+        battle: () => {
+            if(state.busy) return;
+            state.busy = true;
+            document.getElementById('nexus').classList.add('shake');
+            document.getElementById('announcer').innerText = 'Analyzing_Combat_Data...';
 
-c1.classList.add("active")
-c2.classList.add("active")
-}
+            setTimeout(() => {
+                const u0 = REGISTRY.units[state.p[0]];
+                const u1 = REGISTRY.units[state.p[1]];
+                
+                // Deterministic Logic
+                const winnerIdx = (u0.pwr * Math.random()) > (u1.pwr * Math.random()) ? 0 : 1;
+                const winner = REGISTRY.units[state.p[winnerIdx]];
 
-function fight(){
-let p1=db[s1.value]
-let p2=db[s2.value]
+                document.getElementById(`s${winnerIdx}`).classList.add('winner');
+                document.documentElement.style.setProperty('--accent', winner.hex);
+                document.getElementById('announcer').innerText = `Winner: ${winner.name}`;
 
-if(s1.value===s2.value){
-msg.innerText="Aynı karakter seçilemez"
-return
-}
+                // Audio Force Trigger
+                mixer.src = winner.sfx;
+                mixer.play().catch(() => console.log("User interaction required for audio"));
 
-let w=Math.random()<(p1.p/(p1.p+p2.p))?1:2
+                state.busy = false;
+                document.getElementById('nexus').classList.remove('shake');
+            }, 1200);
+        }
+    };
+})();
 
-if(w===1){
-c1.classList.add("winner")
-c2.classList.remove("winner")
-msg.innerText=p1.n+" kazandı"
-a1.src=p1.s;a1.play().catch(()=>{})
-}else{
-c2.classList.add("winner")
-c1.classList.remove("winner")
-msg.innerText=p2.n+" kazandı"
-a2.src=p2.s;a2.play().catch(()=>{})
-}
-}
-
-init()
+window.onload = App.init;
 </script>
-
 </body>
 </html>

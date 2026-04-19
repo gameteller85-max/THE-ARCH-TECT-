@@ -1,72 +1,7 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <title>Architect Singularity V12</title>
-    <style>
-        :root { --accent: #fff; --p0: #111; --p1: #111; }
-        body { margin:0; height:100vh; background:#000; color:#fff; font-family:'JetBrains Mono', monospace; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-        
-        #fx-layer { position:fixed; inset:0; z-index:5; pointer-events:none; }
-        .viewport { position:relative; width:92%; max-width:500px; background:rgba(5,5,5,0.95); border:1px solid #1a1a1a; padding:35px; border-radius:45px; z-index:10; backdrop-filter:blur(50px); box-shadow: 0 0 100px rgba(0,0,0,1); }
-        
-        /* Arena & Slots */
-        .arena { display:flex; gap:15px; margin-bottom:30px; perspective: 1000px; }
-        .slot { flex:1; aspect-ratio:3/4; background:#030303; border:2px solid #111; border-radius:30px; overflow:hidden; position:relative; transition: 0.6s cubic-bezier(0.2, 1, 0.3, 1); }
-        .slot img { width:100%; height:100%; object-fit:cover; opacity:0; transition:0.5s; filter: grayscale(1); }
-        .slot.active img { opacity:0.5; }
-        .slot.winner { border-color: var(--accent); box-shadow: 0 0 50px var(--accent); transform: translateZ(20px) translateY(-10px); }
-        .slot.winner img { opacity:1; filter: grayscale(0) contrast(1.1); }
-
-        /* UI Kit */
-        .controls { display:flex; flex-direction:column; gap:12px; }
-        select, button { background:#080808; color:#fff; border:1px solid #222; padding:18px; border-radius:20px; font-family:inherit; font-weight:700; outline:none; }
-        button { background:var(--accent); color:#000; border:none; text-transform:uppercase; letter-spacing:4px; cursor:pointer; transition: 0.3s; }
-        button:active { transform: scale(0.95); }
-
-        /* FX Animations */
-        .rinne-ring { position:absolute; border:2px solid #9955ff; border-radius:50%; left:50%; top:50%; transform:translate(-50%,-50%); animation: rinne 4s infinite linear; }
-        @keyframes rinne { 0% {width:0; height:0; opacity:1;} 100% {width:1200px; height:1200px; opacity:0;} }
-        
-        .shake { animation: s-shake 0.1s infinite; }
-        @keyframes s-shake { 0%{transform:translateX(3px)} 100%{transform:translateX(-3px)} }
-        
-        #announcer { text-align:center; margin-top:20px; font-size:12px; letter-spacing:3px; color: var(--accent); text-transform:uppercase; min-height:15px; }
-    </style>
-</head>
-<body>
-
-<div id="fx-layer"></div>
-
-<div class="viewport" id="nexus">
-    <div class="arena">
-        <div class="slot" id="s0"><img id="i0"></div>
-        <div class="slot" id="s1"><img id="i1"></div>
-    </div>
-    <div class="controls">
-        <select id="sel0" onchange="App.sync(0, this.value)"></select>
-        <select id="sel1" onchange="App.sync(1, this.value)"></select>
-        <button id="cta" onclick="App.battle()">Initiate Combat</button>
-    </div>
-    <div id="announcer"></div>
-</div>
-
-<script>
 /**
- * ARCHITECT SINGULARITY V12
- * Madara & Minato Integrated | Audio Sync Fixed | FX Logic Rebuilt
+ * ARCHITECT SINGULARITY V12.1 - FINAL REFINEMENT
+ * Ses ve Mantık Motoru Tamamlandı
  */
-
-const REGISTRY = {
-    units: {
-        itachi: { name: "ITACHI", pwr: 94, hex: "#ff3333", img: "https://i.ibb.co/L5rK5Q8/itachi.jpg", sfx: "https://www.myinstants.com/media/sounds/itachi-shisui-susanoo.mp3" },
-        pain: { name: "PAIN", pwr: 98, hex: "#aa66ff", img: "https://i.ibb.co/mS7xZ8M/pain.jpg", sfx: "https://www.myinstants.com/media/sounds/shinra-tensei.mp3", fx: 'rinnegan' },
-        sasuke: { name: "SASUKE", pwr: 92, hex: "#00eeff", img: "https://i.ibb.co/vYm6sF4/sasuke.jpg", sfx: "https://www.myinstants.com/media/sounds/chidori-sound-effect.mp3" },
-        naruto: { name: "NARUTO", pwr: 90, hex: "#ffcc00", img: "https://i.ibb.co/K2Nf6X2/naruto.jpg", sfx: "https://www.myinstants.com/media/sounds/naruto-uzumaki-dattebayo.mp3" },
-        madara: { name: "MADARA", pwr: 99, hex: "#880000", img: "https://i.ibb.co/x7G6J3m/madara.jpg", sfx: "https://www.myinstants.com/media/sounds/madara-uchiha-susanoo.mp3", fx: 'sharingan' },
-        minato: { name: "MINATO", pwr: 95, hex: "#ffffcc", img: "https://i.ibb.co/6P0N2zV/minato.jpg", sfx: "https://www.myinstants.com/media/sounds/hiraishin.mp3" }
-    }
-};
 
 const App = (() => {
     let state = { p: ['itachi', 'pain'], busy: false };
@@ -85,11 +20,13 @@ const App = (() => {
             img.src = u.img;
             img.onload = () => slot.classList.add('active');
 
+            // Rinnegan Efekti Kontrolü
             if(u.fx === 'rinnegan') {
                 fx.innerHTML += `<div class="rinne-ring"></div><div class="rinne-ring" style="animation-delay:1s"></div>`;
             }
         });
-        document.getElementById('announcer').innerText = 'System_Ready';
+        document.getElementById('announcer').innerText = 'SYSTEM_READY_FOR_ENGAGEMENT';
+        document.getElementById('announcer').style.color = '#555';
     };
 
     return {
@@ -105,33 +42,41 @@ const App = (() => {
         battle: () => {
             if(state.busy) return;
             state.busy = true;
-            document.getElementById('nexus').classList.add('shake');
-            document.getElementById('announcer').innerText = 'Analyzing_Combat_Data...';
+            
+            const nexus = document.getElementById('nexus');
+            const announcer = document.getElementById('announcer');
+            
+            nexus.classList.add('shake');
+            announcer.innerText = 'CALCULATING_PROBABILITY_CYCLES...';
+            announcer.style.color = '#fff';
 
             setTimeout(() => {
                 const u0 = REGISTRY.units[state.p[0]];
                 const u1 = REGISTRY.units[state.p[1]];
                 
-                // Deterministic Logic
+                // Karakter Güç Dengesi ve Randomize Faktör
                 const winnerIdx = (u0.pwr * Math.random()) > (u1.pwr * Math.random()) ? 0 : 1;
                 const winner = REGISTRY.units[state.p[winnerIdx]];
 
+                // Görsel Bildirim
                 document.getElementById(`s${winnerIdx}`).classList.add('winner');
                 document.documentElement.style.setProperty('--accent', winner.hex);
-                document.getElementById('announcer').innerText = `Winner: ${winner.name}`;
+                announcer.innerText = `OUTCOME: ${winner.name}_DOMINANCE`;
+                announcer.style.color = winner.hex;
 
-                // Audio Force Trigger
+                // Ses Motoru - Zorunlu Tetikleme
                 mixer.src = winner.sfx;
-                mixer.play().catch(() => console.log("User interaction required for audio"));
+                mixer.play().catch(e => {
+                    console.log("Audio stream blocked by browser security layer.");
+                    announcer.innerText += " (AUDIO_MUTED)";
+                });
 
                 state.busy = false;
-                document.getElementById('nexus').classList.remove('shake');
+                nexus.classList.remove('shake');
             }, 1200);
         }
     };
 })();
 
+// Sayfa yüklendiğinde motoru çalıştır
 window.onload = App.init;
-</script>
-</body>
-</html>

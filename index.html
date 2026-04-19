@@ -2,118 +2,33 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Architect FIXED CORE</title>
+<title>ARCHITECT V11 FIX</title>
 
 <style>
-:root{
-  --accent:#fff;
-  --p1:#111;
-  --p2:#111;
-}
-
 body{
-  margin:0;
-  height:100vh;
-  background:#000;
-  color:#fff;
-  font-family:monospace;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
+margin:0;height:100vh;background:#000;color:#fff;
+display:flex;align-items:center;justify-content:center;
+font-family:monospace;
 }
 
-/* FX */
-#fx{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:1;
-}
+.viewport{width:420px;background:#0a0a0a;padding:30px;border-radius:20px}
 
-.ring{
-  position:absolute;
-  border:2px solid rgba(170,102,255,0.3);
-  border-radius:50%;
-  width:200px;
-  height:200px;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  animation:pulse 3s infinite;
-}
+.arena{display:flex;justify-content:space-between;margin-bottom:20px}
 
-@keyframes pulse{
-  0%{transform:translate(-50%,-50%) scale(0.5);opacity:0.5}
-  100%{transform:translate(-50%,-50%) scale(2);opacity:0}
-}
+.card{width:160px;height:220px;background:#111;border-radius:15px;overflow:hidden}
+.card img{width:100%;height:100%;object-fit:cover;opacity:0;transition:.5s}
+.card.active img{opacity:1}
+.card.winner{border:2px solid gold}
 
-.viewport{
-  width:420px;
-  background:#0a0a0a;
-  padding:30px;
-  border-radius:20px;
-  border:1px solid #222;
-  z-index:2;
+button,select{
+width:100%;padding:12px;margin-top:10px;
+background:#111;color:#fff;border:1px solid #333;border-radius:10px
 }
-
-.arena{
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:20px;
-}
-
-.card{
-  width:45%;
-  aspect-ratio:3/4;
-  background:#111;
-  border-radius:10px;
-  overflow:hidden;
-  border:1px solid #222;
-}
-
-.card img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  opacity:0;
-  filter:grayscale(1);
-  transition:0.4s;
-}
-
-.card.active img{
-  opacity:1;
-}
-
-.card.winner{
-  border-color:gold;
-  transform:scale(1.05);
-}
-
-select,button{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  background:#111;
-  color:#fff;
-  border:1px solid #333;
-}
-
-button{
-  background:#fff;
-  color:#000;
-  font-weight:bold;
-  cursor:pointer;
-}
-button:disabled{
-  opacity:0.3;
-}
+button{cursor:pointer;background:#fff;color:#000;font-weight:bold}
 </style>
 </head>
 
 <body>
-
-<div id="fx"></div>
 
 <div class="viewport">
   <div class="arena">
@@ -121,122 +36,72 @@ button:disabled{
     <div class="card" id="c2"><img id="i2"></div>
   </div>
 
-  <select id="p1"></select>
-  <select id="p2"></select>
+  <select id="s1"></select>
+  <select id="s2"></select>
+  <button onclick="fight()">FIGHT</button>
 
-  <button id="fight">FIGHT</button>
-
-  <p id="txt">READY</p>
+  <div id="msg" style="margin-top:10px;font-size:12px"></div>
 </div>
 
 <script>
+const db = {
+itachi:{n:"Itachi",p:94,i:"https://i.ibb.co/L5rK5Q8/itachi.jpg",s:"https://www.myinstants.com/media/sounds/itachi-shisui-susanoo.mp3"},
+pain:{n:"Pain",p:96,i:"https://i.ibb.co/mS7xZ8M/pain.jpg",s:"https://www.myinstants.com/media/sounds/shinra-tensei.mp3"},
+sasuke:{n:"Sasuke",p:91,i:"https://i.ibb.co/vYm6sF4/sasuke.jpg",s:"https://www.myinstants.com/media/sounds/chidori-sound-effect.mp3"},
+naruto:{n:"Naruto",p:88,i:"https://i.ibb.co/K2Nf6X2/naruto.jpg",s:"https://www.myinstants.com/media/sounds/naruto-uzumaki-dattebayo.mp3"},
 
-const DB = {
-  itachi:{p:94,img:"https://i.ibb.co/L5rK5Q8/itachi.jpg"},
-  pain:{p:96,img:"https://i.ibb.co/mS7xZ8M/pain.jpg"},
-  naruto:{p:88,img:"https://i.ibb.co/K2Nf6X2/naruto.jpg"},
-  sasuke:{p:91,img:"https://i.ibb.co/vYm6sF4/sasuke.jpg"}
+madara:{n:"Madara Uchiha",p:98,i:"https://i.ibb.co/7Y9Q7kZ/madara.jpg",s:"https://www.myinstants.com/media/sounds/susanoo.mp3"},
+minato:{n:"Minato Namikaze",p:97,i:"https://i.ibb.co/3vK5Z9R/minato.jpg",s:"https://www.myinstants.com/media/sounds/hiraishin.mp3"}
 };
 
-let state = {
-  p1:"itachi",
-  p2:"pain",
-  busy:false
-};
+let a1=new Audio(),a2=new Audio();
 
-// preload cache
-const cache = {};
-
-function loadImg(key){
-  return new Promise(res=>{
-    if(cache[key]) return res(cache[key]);
-    const img = new Image();
-    img.src = DB[key].img;
-    img.onload=()=>{
-      cache[key]=img.src;
-      res(img.src);
-    };
-    img.onerror=()=>res("");
-  });
+function init(){
+for(let k in db){
+s1.innerHTML+=`<option value="${k}">${db[k].n}</option>`
+s2.innerHTML+=`<option value="${k}">${db[k].n}</option>`
+}
+s1.value="itachi"
+s2.value="pain"
+sync()
 }
 
-function render(){
-  const i1=document.getElementById("i1");
-  const i2=document.getElementById("i2");
+function sync(){
+let p1=db[s1.value]
+let p2=db[s2.value]
 
-  loadImg(state.p1).then(src=>{
-    i1.src=src;
-    document.getElementById("c1").classList.add("active");
-  });
+i1.src=p1.i
+i2.src=p2.i
 
-  loadImg(state.p2).then(src=>{
-    i2.src=src;
-    document.getElementById("c2").classList.add("active");
-  });
-}
-
-function updateFX(){
-  const fx=document.getElementById("fx");
-  fx.innerHTML="";
-
-  if(state.p1==="pain"||state.p2==="pain"){
-    fx.innerHTML=`<div class="ring"></div>`;
-  }
+c1.classList.add("active")
+c2.classList.add("active")
 }
 
 function fight(){
-  if(state.busy) return;
-  state.busy=true;
+let p1=db[s1.value]
+let p2=db[s2.value]
 
-  const txt=document.getElementById("txt");
-  txt.innerText="FIGHTING...";
-
-  document.getElementById("c1").classList.remove("winner");
-  document.getElementById("c2").classList.remove("winner");
-
-  setTimeout(()=>{
-
-    const a=DB[state.p1].p + Math.random()*10;
-    const b=DB[state.p2].p + Math.random()*10;
-
-    const win = a>b?0:1;
-
-    const winKey = win===0?state.p1:state.p2;
-
-    document.getElementById("txt").innerText="WINNER: "+winKey.toUpperCase();
-    document.getElementById("txt").style.color="gold";
-
-    document.getElementById(win===0?"c1":"c2").classList.add("winner");
-
-    state.busy=false;
-
-  },1200);
+if(s1.value===s2.value){
+msg.innerText="Aynı karakter seçilemez"
+return
 }
 
-// init
-function init(){
-  const p1=document.getElementById("p1");
-  const p2=document.getElementById("p2");
+let w=Math.random()<(p1.p/(p1.p+p2.p))?1:2
 
-  Object.keys(DB).forEach(k=>{
-    p1.innerHTML+=`<option value="${k}">${k}</option>`;
-    p2.innerHTML+=`<option value="${k}">${k}</option>`;
-  });
-
-  p1.value=state.p1;
-  p2.value=state.p2;
-
-  p1.onchange=e=>{state.p1=e.target.value;render();updateFX();}
-  p2.onchange=e=>{state.p2=e.target.value;render();updateFX();}
-
-  document.getElementById("fight").onclick=fight;
-
-  render();
-  updateFX();
+if(w===1){
+c1.classList.add("winner")
+c2.classList.remove("winner")
+msg.innerText=p1.n+" kazandı"
+a1.src=p1.s;a1.play().catch(()=>{})
+}else{
+c2.classList.add("winner")
+c1.classList.remove("winner")
+msg.innerText=p2.n+" kazandı"
+a2.src=p2.s;a2.play().catch(()=>{})
+}
 }
 
-init();
-
+init()
 </script>
 
 </body>

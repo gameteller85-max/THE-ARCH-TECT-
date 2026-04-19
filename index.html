@@ -1,29 +1,4 @@
-<div style="margin-top:30px; padding:25px; background:#1a1a1a; border-radius:15px; border: 1px solid #333; font-family: sans-serif; text-align: center; color: white;">
 
-    <h2 style="color: #ff4444; letter-spacing: 1px; margin-bottom: 20px;">⚔️ Efsanevi Karşılaşma</h2>
-
-    <div style="display: flex; justify-content: space-around; margin-bottom: 20px; font-size: 0.9em;">
-        <div style="text-align: left; padding: 10px; border-left: 3px solid #ffa500; background: #222; border-radius: 5px; width: 40%;">
-            <b style="color:#ffa500;">Uzumaki Naruto</b><br>
-            <span style="font-size: 0.8em; opacity: 0.8;">Güç: 90 | Hız: 85 | Zeka: 70</span>
-        </div>
-        <div style="text-align: left; padding: 10px; border-left: 3px solid #ff4444; background: #222; border-radius: 5px; width: 40%;">
-            <b style="color:#ff4444;">Uchiha Itachi</b><br>
-            <span style="font-size: 0.8em; opacity: 0.8;">Güç: 88 | Hız: 90 | Zeka: 95</span>
-        </div>
-    </div>
-
-    <button onclick="fightNI()" style="cursor: pointer; width: 80%; padding: 12px; border: none; border-radius: 10px; background: #ff4444; color: white; font-weight: bold; transition: 0.3s; box-shadow: 0 4px 15px rgba(255, 68, 68, 0.2);">
-        SAVAŞI BAŞLAT
-    </button>
-
-    <div id="resultBoxNI" style="margin-top:20px; min-height: 40px; border-top: 1px solid #333; padding-top: 15px;">
-        <p id="resultNI" style="font-size: 1.2em; font-weight: bold; margin: 0;"></p>
-    </div>
-
-</div>
-
-<script>
 function fightNI() {
     const resultElement = document.getElementById("resultNI");
     
@@ -52,3 +27,126 @@ function fightNI() {
 }
                </script>
                
+<div class="vs-box">
+
+<h2>⚔️ Efsanevi Karşılaşma</h2>
+
+<select id="char1"></select>
+<select id="char2"></select>
+
+<br>
+
+<button onclick="fight()">SAVAŞ BAŞLAT</button>
+
+<p id="result"></p>
+
+</div>
+
+<audio id="winSound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3"></audio>
+
+<style>
+.vs-box{
+  background:#1a1a1a;
+  padding:20px;
+  border-radius:15px;
+  text-align:center;
+  margin-top:30px;
+}
+
+select, button{
+  padding:10px;
+  margin:10px;
+  border-radius:10px;
+  border:none;
+}
+
+button{
+  background:#ff4444;
+  color:white;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#ff2222;
+}
+
+#result{
+  margin-top:20px;
+  font-weight:bold;
+  font-size:18px;
+}
+
+/* ANİMASYON */
+.win{
+  animation: glow 0.6s infinite alternate;
+}
+
+@keyframes glow{
+  from{ text-shadow:0 0 5px red; }
+  to{ text-shadow:0 0 20px orange; }
+}
+
+/* TİTREŞİM */
+.shake{
+  animation: shake 0.3s;
+}
+
+@keyframes shake{
+  0%{transform:translateX(0);}
+  25%{transform:translateX(-5px);}
+  50%{transform:translateX(5px);}
+  75%{transform:translateX(-5px);}
+  100%{transform:translateX(0);}
+}
+</style>
+
+<script>
+
+const characters = [
+ {name:"Naruto", power:90, speed:85, iq:70},
+ {name:"Itachi", power:88, speed:90, iq:95},
+ {name:"Sasuke", power:89, speed:88, iq:80}
+];
+
+const s1 = document.getElementById("char1");
+const s2 = document.getElementById("char2");
+const resultEl = document.getElementById("result");
+
+characters.forEach((c,i)=>{
+  s1.add(new Option(c.name,i));
+  s2.add(new Option(c.name,i));
+});
+
+function fight(){
+
+let c1 = characters[s1.value];
+let c2 = characters[s2.value];
+
+if(s1.value === s2.value){
+  resultEl.innerText = "Aynı karakter seçilemez!";
+  return;
+}
+
+let score1 = c1.power + c1.speed + c1.iq + Math.random()*20;
+let score2 = c2.power + c2.speed + c2.iq + Math.random()*20;
+
+let winner = score1 > score2 ? c1.name : c2.name;
+
+resultEl.innerText = "🔥 Kazanan: " + winner;
+
+// animasyon
+resultEl.classList.add("win");
+document.body.classList.add("shake");
+
+// ses
+document.getElementById("winSound").play();
+
+// temizleme
+setTimeout(()=>{
+  resultEl.classList.remove("win");
+  document.body.classList.remove("shake");
+},800);
+
+}
+
+      </script>

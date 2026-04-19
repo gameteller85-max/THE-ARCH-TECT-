@@ -3,153 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Efsanevi Karşılaşma v2.4 - Pain Quotes</title>
+    <title>Efsanevi Karşılaşma v3.1 - Final Control</title>
 </head>
 <body>
 
 <div id="rinnegan-bg"></div>
-
 <div id="quote-box">"Dünya acıyı anlayacak..."</div>
 
 <div class="vs-box">
     <h2>⚔️ Efsanevi Karşılaşma</h2>
-
     <div class="selection-area">
         <select id="char1"></select>
         <span style="color: white; font-weight: bold; margin: 0 10px;">VS</span>
         <select id="char2"></select>
     </div>
-
     <br>
-
     <button id="fightBtn" onclick="fight()">SAVAŞ BAŞLAT</button>
-
     <p id="result">Karakterini seç ve savaşı başlat!</p>
 </div>
 
+<div class="signature">
+    DEVELOPED BY <span class="architect-name">THE ARCHITECT MUSTAFA</span>
+</div>
+
 <audio id="winSound" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto"></audio>
+<audio id="shinraTensei" src="https://www.myinstants.com/media/sounds/shinra-tensei.mp3" preload="auto"></audio>
 
 <style>
     * { box-sizing: border-box; }
-    
     body {
         background-color: #0d0d0d;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Segoe UI', sans-serif;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         height: 100vh;
         margin: 0;
         overflow: hidden;
-        transition: background 0.6s ease;
     }
-
-    /* PAIN SÖZÜ KUTUSU TASARIMI */
+    .signature { position: fixed; bottom: 20px; color: #444; font-size: 11px; letter-spacing: 2px; font-weight: bold; z-index: 10; }
+    .architect-name { color: #666; transition: 0.5s; }
+    .signature:hover .architect-name { color: #ff4444; text-shadow: 0 0 10px #ff4444; }
     #quote-box {
-        position: fixed;
-        top: -120px; /* Ekranın dışına sakla */
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(20, 10, 30, 0.95);
-        color: #ff3333;
-        padding: 15px 40px;
-        border-radius: 0 0 25px 25px;
-        border: 2px solid #4b3d61;
-        border-top: none;
-        font-style: italic;
-        font-size: 22px;
-        font-weight: bold;
-        text-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
-        z-index: 100;
-        transition: top 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        position: fixed; top: -120px; left: 50%; transform: translateX(-50%);
+        background: rgba(20, 10, 30, 0.95); color: #ff3333; padding: 15px 40px;
+        border-radius: 0 0 25px 25px; border: 2px solid #4b3d61; font-style: italic;
+        font-size: 22px; font-weight: bold; text-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+        z-index: 100; transition: top 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-
-    /* SÖZÜ GÖSTEREN SINIF */
-    #quote-box.show {
-        top: 0; /* Aşağı indir */
-    }
-
-    /* RİNNEGAN ARKA PLAN */
+    #quote-box.show { top: 0; }
     #rinnegan-bg {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 350vw;
-        height: 350vh;
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 350vw; height: 350vh; opacity: 0; z-index: -1; transition: opacity 1s ease;
         background: repeating-radial-gradient(circle, #1a0d26 0%, #1a0d26 8%, #4b3d61 9%, #4b3d61 10%, #1a0d26 11%);
-        opacity: 0;
-        z-index: -1;
-        transition: opacity 0.8s ease;
     }
-
-    .vs-box {
-        background: rgba(26, 26, 26, 0.92);
-        padding: 30px;
-        border-radius: 20px;
-        text-align: center;
-        width: 90%;
-        max-width: 450px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.9);
-        border: 2px solid #333;
-        z-index: 10;
-        backdrop-filter: blur(10px);
-    }
-
-    h2 { color: #fff; margin-bottom: 25px; }
-
-    .selection-area {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    select {
-        padding: 12px;
-        background: #333;
-        color: white;
-        border: 1px solid #555;
-        border-radius: 10px;
-        width: 42%;
-        outline: none;
-    }
-
-    button {
-        background: linear-gradient(45deg, #ff4444, #cc0000);
-        color: white;
-        padding: 15px;
-        border: none;
-        border-radius: 50px;
-        font-weight: bold;
-        width: 100%;
-        cursor: pointer;
-        transition: 0.3s;
-        box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
-    }
-
-    button:hover { transform: scale(1.02); }
-
-    #result {
-        margin-top: 30px;
-        color: #ddd;
-        font-size: 20px;
-        font-weight: bold;
-        transition: 0.3s;
-    }
-
-    .win-text {
-        color: #ffcc00 !important;
-        text-shadow: 0 0 20px #ffcc00;
-    }
-
-    .shake { animation: shake 0.4s; }
-    @keyframes shake {
+    .vs-box { background: rgba(26, 26, 26, 0.92); padding: 30px; border-radius: 20px; text-align: center; width: 90%; max-width: 450px; border: 2px solid #333; z-index: 10; }
+    h2 { color: #fff; }
+    select { padding: 12px; background: #333; color: white; border-radius: 10px; width: 42%; }
+    button { background: linear-gradient(45deg, #ff4444, #cc0000); color: white; padding: 15px; border: none; border-radius: 50px; font-weight: bold; width: 100%; cursor: pointer; }
+    #result { margin-top: 30px; color: #ddd; font-size: 20px; font-weight: bold; }
+    .win-text { color: #ffcc00 !important; text-shadow: 0 0 20px #ffcc00; }
+    .shake-heavy { animation: shake-heavy 0.8s; }
+    @keyframes shake-heavy {
         0%, 100% { transform: translate(0,0); }
-        25% { transform: translate(-5px, 5px); }
-        50% { transform: translate(5px, -5px); }
-        75% { transform: translate(-5px, -5px); }
+        25% { transform: translate(-10px, 10px); }
+        50% { transform: translate(10px, -10px); }
+        75% { transform: translate(-10px, -10px); }
     }
 </style>
 
@@ -169,68 +89,52 @@
     const box = document.querySelector(".vs-box");
 
     function init() {
-        s1.innerHTML = "";
-        s2.innerHTML = "";
+        s1.innerHTML = ""; s2.innerHTML = "";
         characters.forEach((char, index) => {
             s1.add(new Option(char.name, index));
             s2.add(new Option(char.name, index));
         });
-        s1.selectedIndex = 3; // Sol Pain
-        s2.selectedIndex = 1; // Sağ Itachi
+        s1.selectedIndex = 3; s2.selectedIndex = 0;
     }
 
     function fight() {
         const val1 = parseInt(s1.value);
         const val2 = parseInt(s2.value);
+        if (val1 === val2) { resultEl.innerText = "❌ Aynı karakter olmaz!"; return; }
 
-        if (val1 === val2) {
-            resultEl.innerText = "❌ Aynı karakterler savaşamaz!";
-            resultEl.style.color = "#ff4444";
-            return;
-        }
-
-        const btn = document.getElementById("fightBtn");
-        btn.disabled = true;
-
-        // Her şeyi sıfırla
+        // Sıfırla
         rinnegan.style.opacity = "0";
         quoteBox.classList.remove("show");
         document.body.style.background = "#0d0d0d";
-        resultEl.classList.remove("win-text");
-        resultEl.style.color = "#ddd";
         resultEl.innerText = "⚡ Çakralar çarpışıyor...";
 
         setTimeout(() => {
             const c1 = characters[val1];
             const c2 = characters[val2];
-
-            // Güç Dengesi + Şans Faktörü
-            let score1 = (c1.power * 0.5) + (c1.speed * 0.3) + (c1.iq * 0.2) + (Math.random() * 15);
-            let score2 = (c2.power * 0.5) + (c2.speed * 0.3) + (c2.iq * 0.2) + (Math.random() * 15);
-
-            let winner = score1 > score2 ? c1.name : c2.name;
+            let p1 = (c1.power * 0.5) + (c1.speed * 0.3) + (c1.iq * 0.2) + (Math.random() * 20);
+            let p2 = (c2.power * 0.5) + (c2.speed * 0.3) + (c2.iq * 0.2) + (Math.random() * 20);
+            let winner = p1 > p2 ? c1.name : c2.name;
 
             resultEl.innerText = "🔥 Kazanan: " + winner;
             resultEl.classList.add("win-text");
-            box.classList.add("shake");
 
-            // ÖZEL: Pain Kazandıysa Efektleri Patlat
             if (winner === "Pain") {
                 rinnegan.style.opacity = "1";
                 document.body.style.background = "#1a0d26";
-                quoteBox.classList.add("show"); // Sözü yukarıdan indir
+                quoteBox.classList.add("show");
+                box.classList.add("shake-heavy");
+                
+                // SES KONTROLÜ
+                const voice = document.getElementById("shinraTensei");
+                voice.currentTime = 0; // Baştan başla
+                voice.play().catch(e => console.log("Ses çalma hatası:", e));
+            } else {
+                document.getElementById("winSound").play().catch(() => {});
             }
 
-            document.getElementById("winSound").play().catch(() => {});
-
-            setTimeout(() => {
-                box.classList.remove("shake");
-                btn.disabled = false;
-            }, 500);
-
+            setTimeout(() => box.classList.remove("shake-heavy"), 800);
         }, 850);
     }
-
     init();
 </script>
 

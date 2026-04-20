@@ -2,31 +2,52 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>The Architect V12.5</title>
+    <title>Architect V14.5 - Lightning God</title>
     <style>
-        :root { --accent: #fff; }
+        :root { --accent: #fff; --fx-color: rgba(255,255,255,0.1); }
         body { margin:0; height:100vh; background:#000; color:#fff; font-family:'JetBrains Mono', monospace; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-        #fx-layer { position:fixed; inset:0; z-index:5; pointer-events:none; }
-        .viewport { position:relative; width:92%; max-width:500px; background:rgba(10,10,10,0.98); border:1px solid #1a1a1a; padding:35px; border-radius:45px; z-index:10; }
+        
+        #fx-background { position:fixed; inset:0; z-index:1; pointer-events:none; display:flex; align-items:center; justify-content:center; }
+        
+        /* Sarsılma Efekti */
+        .shake { animation: extreme-shake 0.12s infinite; }
+        @keyframes extreme-shake {
+            0% { transform: translate(3px, 2px); }
+            50% { transform: translate(-2px, -3px); }
+            100% { transform: translate(2px, 3px); }
+        }
+
+        /* FX Katmanları */
+        .sharingan-bg { position: absolute; width: 550px; height: 550px; border: 12px double var(--fx-color); border-radius: 50%; animation: spin 20s linear infinite; opacity: 0.3; filter: blur(2px); }
+        .rinne-ring { position:absolute; border:3px solid var(--fx-color); border-radius:50%; animation: rinne-expand 3.5s infinite linear; }
+        @keyframes spin { from {transform: rotate(0deg);} to {transform: rotate(360deg);} }
+        @keyframes rinne-expand { 0% {width:0; height:0; opacity:1;} 100% {width:1500px; height:1500px; opacity:0;} }
+
+        .viewport { position:relative; width:92%; max-width:500px; background:rgba(6,6,6,0.98); border:1px solid #1a1a1a; padding:35px; border-radius:45px; z-index:10; backdrop-filter:blur(30px); }
+        
         .arena { display:flex; gap:15px; margin-bottom:30px; }
-        .slot { flex:1; aspect-ratio:3/4; background:#030303; border:2px solid #111; border-radius:30px; overflow:hidden; position:relative; transition: 0.5s; display:flex; align-items:center; justify-content:center; }
-        .slot img { width:80%; height:80%; object-fit:contain; opacity:0; transition:0.5s; filter: grayscale(1); }
-        .slot.active img { opacity:0.6; }
-        .slot.winner { border-color: var(--accent); box-shadow: 0 0 50px var(--accent); transform: scale(1.05); }
-        .slot.winner img { opacity:1; filter: grayscale(0); }
+        .slot { flex:1; aspect-ratio:3/4; background:#030303; border:2px solid #111; border-radius:35px; overflow:hidden; position:relative; transition: 0.5s; display:flex; align-items:center; justify-content:center; }
+        
+        .slot img { width:65%; height:65%; object-fit:contain; opacity:0; transform: scale(0.7); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .slot.active img { opacity:0.65; transform: scale(1); }
+        .slot.winner { border-color: var(--accent); box-shadow: 0 0 70px -15px var(--accent); transform: translateY(-12px); }
+        .slot.winner img { opacity:1; filter: drop-shadow(0 0 20px var(--accent)); transform: scale(1.15); }
+
         .controls { display:flex; flex-direction:column; gap:12px; }
-        select, button { background:#080808; color:#fff; border:1px solid #222; padding:18px; border-radius:20px; font-family:inherit; font-weight:700; outline:none; }
-        button { background:var(--accent); color:#000; border:none; text-transform:uppercase; letter-spacing:4px; cursor:pointer; }
-        .rinne-ring { position:absolute; border:2px solid #9955ff; border-radius:50%; left:50%; top:50%; transform:translate(-50%,-50%); animation: rinne 4s infinite linear; }
-        @keyframes rinne { 0% {width:0; height:0; opacity:1;} 100% {width:1200px; height:1200px; opacity:0;} }
-        .shake { animation: s-shake 0.1s infinite; }
-        @keyframes s-shake { 0%{transform:translateX(3px)} 100%{transform:translateX(-3px)} }
-        #announcer { text-align:center; margin-top:20px; font-size:12px; letter-spacing:3px; text-transform:uppercase; min-height:15px; }
+        select, button { background:#0a0a0a; color:#fff; border:1px solid #252525; padding:18px; border-radius:24px; font-family:inherit; font-weight:700; outline:none; transition: 0.3s; }
+        button { background:var(--accent); color:#000; border:none; text-transform:uppercase; letter-spacing:4px; cursor:pointer; font-size:14px; }
+        button:hover { filter: brightness(1.2); }
+
+        #status { text-align:center; margin-top:25px; font-size:11px; letter-spacing:5px; color: var(--accent); text-transform:uppercase; font-weight:900; }
+        
+        /* Hiraishin Flash Layer */
+        .hiraishin-flash { position:fixed; inset:0; background:#ffffdd; z-index:99; opacity:0; pointer-events:none; }
     </style>
 </head>
 <body>
 
-<div id="fx-layer"></div>
+<div id="fx-background"></div>
+<div id="hiraishin" class="hiraishin-flash"></div>
 
 <div class="viewport" id="nexus">
     <div class="arena">
@@ -36,20 +57,20 @@
     <div class="controls">
         <select id="sel0" onchange="App.sync(0, this.value)"></select>
         <select id="sel1" onchange="App.sync(1, this.value)"></select>
-        <button id="cta" onclick="App.battle()">INITIATE COMBAT</button>
+        <button onclick="App.battle()">START_COMBAT_SIM</button>
     </div>
-    <div id="announcer">SYSTEM_READY</div>
+    <div id="status">CORE_STABLE</div>
 </div>
 
 <script>
 const REGISTRY = {
     units: {
-        itachi: { name: "ITACHI", pwr: 94, hex: "#ff3333", img: "https://upload.wikimedia.org/wikipedia/commons/3/3d/Sharingan_triple.svg", sfx: "https://www.myinstants.com/media/sounds/itachi-shisui-susanoo.mp3" },
+        itachi: { name: "ITACHI", pwr: 94, hex: "#ff3333", img: "https://upload.wikimedia.org/wikipedia/commons/3/3d/Sharingan_triple.svg", sfx: "https://www.myinstants.com/media/sounds/itachi-shisui-susanoo.mp3", fx: 'sharingan' },
         pain: { name: "PAIN", pwr: 98, hex: "#aa66ff", img: "https://upload.wikimedia.org/wikipedia/commons/5/55/Rinnegan_symbol.svg", sfx: "https://www.myinstants.com/media/sounds/shinra-tensei.mp3", fx: 'rinnegan' },
-        sasuke: { name: "SASUKE", pwr: 92, hex: "#00eeff", img: "https://upload.wikimedia.org/wikipedia/commons/5/5a/Lightning_icon.svg", sfx: "https://www.myinstants.com/media/sounds/chidori-sound-effect.mp3" },
+        sasuke: { name: "SASUKE", pwr: 92, hex: "#00eeff", img: "https://upload.wikimedia.org/wikipedia/commons/5/5a/Lightning_icon.svg", sfx: "https://www.myinstants.com/media/sounds/chidori-sound-effect.mp3", fx: 'sharingan' },
         naruto: { name: "NARUTO", pwr: 90, hex: "#ffcc00", img: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Konoha_symbol.svg", sfx: "https://www.myinstants.com/media/sounds/naruto-uzumaki-dattebayo.mp3" },
-        madara: { name: "MADARA", pwr: 99, hex: "#880000", img: "https://upload.wikimedia.org/wikipedia/commons/9/9a/Uchiha_clan_logo.svg", sfx: "https://www.myinstants.com/media/sounds/madara-uchiha-susanoo.mp3" },
-        minato: { name: "MINATO", pwr: 95, hex: "#ffffcc", img: "https://upload.wikimedia.org/wikipedia/commons/1/1a/Kunai_icon.svg", sfx: "https://www.myinstants.com/media/sounds/hiraishin.mp3" }
+        madara: { name: "MADARA", pwr: 99, hex: "#ff0000", img: "https://upload.wikimedia.org/wikipedia/commons/9/9a/Uchiha_clan_logo.svg", sfx: "https://www.myinstants.com/media/sounds/madara-uchiha-susanoo.mp3", fx: 'sharingan' },
+        minato: { name: "MINATO", pwr: 95, hex: "#ffffcc", img: "https://upload.wikimedia.org/wikipedia/commons/1/1a/Kunai_icon.svg", sfx: "https://www.myinstants.com/media/sounds/hiraishin.mp3", fx: 'flash' }
     }
 };
 
@@ -57,19 +78,17 @@ const App = (() => {
     let state = { p: ['itachi', 'pain'], busy: false };
     const mixer = new Audio();
 
-    const updateUI = () => {
-        const fx = document.getElementById('fx-layer');
-        fx.innerHTML = '';
-        state.p.forEach((id, i) => {
-            const u = REGISTRY.units[id];
-            const slot = document.getElementById(`s${i}`);
-            const img = document.getElementById(`i${i}`);
-            slot.classList.remove('winner');
-            img.src = u.img;
-            img.onload = () => slot.classList.add('active');
-            if(u.fx === 'rinnegan') fx.innerHTML = '<div class="rinne-ring"></div><div class="rinne-ring" style="animation-delay:2s"></div>';
+    const updateFX = () => {
+        const bg = document.getElementById('fx-background');
+        bg.innerHTML = '';
+        const activeFX = [...new Set(state.p.map(id => REGISTRY.units[id].fx).filter(Boolean))];
+        
+        activeFX.forEach(fxType => {
+            const unit = REGISTRY.units[state.p.find(id => REGISTRY.units[id].fx === fxType)];
+            document.documentElement.style.setProperty('--fx-color', unit.hex + "25");
+            if(fxType === 'sharingan') bg.innerHTML += '<div class="sharingan-bg"></div>';
+            if(fxType === 'rinnegan') bg.innerHTML += '<div class="rinne-ring"></div><div class="rinne-ring" style="animation-delay:1.5s"></div>';
         });
-        document.getElementById('announcer').innerText = 'READY_TO_BATTLE';
     };
 
     return {
@@ -79,27 +98,57 @@ const App = (() => {
                 sels.forEach(s => s.innerHTML += `<option value="${k}">${REGISTRY.units[k].name}</option>`);
             });
             sels[0].value = state.p[0]; sels[1].value = state.p[1];
-            updateUI();
+            App.sync(0, state.p[0]);
         },
-        sync: (i, v) => { state.p[i] = v; updateUI(); },
+        sync: (i, v) => {
+            state.p[i] = v;
+            const slot = document.getElementById(`s${i}`);
+            slot.classList.remove('active', 'winner');
+            setTimeout(() => {
+                document.getElementById(`i${i}`).src = REGISTRY.units[v].img;
+                slot.classList.add('active');
+                updateFX();
+            }, 50);
+            document.getElementById('status').innerText = 'NEURAL_STABLE';
+        },
         battle: () => {
             if(state.busy) return;
             state.busy = true;
-            document.getElementById('nexus').classList.add('shake');
-            document.getElementById('announcer').innerText = 'ANALYZING...';
+            
+            const nexus = document.getElementById('nexus');
+            const status = document.getElementById('status');
+            const flash = document.getElementById('hiraishin');
+            
+            nexus.classList.add('shake');
+            status.innerText = 'DATA_SYNC_IN_PROGRESS...';
+            
             setTimeout(() => {
-                const u1 = REGISTRY.units[state.p[0]];
-                const u2 = REGISTRY.units[state.p[1]];
-                const winIdx = (u1.pwr * Math.random()) > (u2.pwr * Math.random()) ? 0 : 1;
+                const u0 = REGISTRY.units[state.p[0]];
+                const u1 = REGISTRY.units[state.p[1]];
+                const winIdx = (u0.pwr * Math.random()) > (u1.pwr * Math.random()) ? 0 : 1;
                 const winner = REGISTRY.units[state.p[winIdx]];
+
+                //⚡ SENİN EKLEDİĞİN KESKİN PARLAMA MANTIĞI:
+                if(winner.fx === 'flash') {
+                    flash.style.transition = 'none';
+                    flash.style.opacity = '1';
+                    setTimeout(() => {
+                        flash.style.transition = 'opacity 0.6s ease-out';
+                        flash.style.opacity = '0';
+                    }, 50);
+                }
+
                 document.getElementById(`s${winIdx}`).classList.add('winner');
                 document.documentElement.style.setProperty('--accent', winner.hex);
-                document.getElementById('announcer').innerText = 'WINNER: ' + winner.name;
+                status.innerText = `OUTCOME: ${winner.name}_DOMINANCE`;
+
                 mixer.src = winner.sfx;
-                mixer.play();
+                mixer.load();
+                mixer.play().catch(() => status.innerText += " (AUDIO_ERR)");
+
                 state.busy = false;
-                document.getElementById('nexus').classList.remove('shake');
-            }, 1000);
+                nexus.classList.remove('shake');
+            }, 1200);
         }
     };
 })();
